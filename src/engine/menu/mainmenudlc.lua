@@ -66,6 +66,8 @@ function MainMenuDLC:init(menu)
 
     self.font = Assets.getFont("main", 16)
 
+	self.error = Assets.getTexture("dlc/buttons/error")
+
     DLC = self -- For easy access in the console
 end
 
@@ -133,7 +135,15 @@ function MainMenuDLC:draw()
 	self.state_manager:draw()
 
 	Draw.setColor(COLORS.red)
+	
+	love.graphics.pop()
+	love.graphics.setNewFont(12)
 	Draw.printShadow("Note: This thing is held together by hopes and dreams", 0, SCREEN_HEIGHT-16)
+	love.graphics.push()
+
+	if not HTTPS_AVAILABLE then
+		Draw.draw(self.error, SCREEN_WIDTH-self.error:getWidth(), 8)
+	end
 end
 
 function MainMenuDLC:onKeyPressed(key, is_repeat)
@@ -305,10 +315,14 @@ function MainMenuDLC:drawMain()
 			d_text = d_text.."Delete"
 		elseif mod.repo_data then
 			d_text = d_text.."Download"
+			if not HTTPS_AVAILABLE then
+				love.graphics.setColor(0.6,0.6,0.6,0.8)
+			end
 		else
 			d_text = ""
 		end
 		love.graphics.print(d_text, 315, bottom_rect_y-32)
+		love.graphics.setColor(1,1,1,1)
 
 		local f_text = Input.getText("menu").." Open DLC Folder"
 		local width = self.font:getWidth(f_text)+5
@@ -774,13 +788,17 @@ function MainMenuDLC:handleMod(id)
 	print("Handle "..id)
 	local data = Kristal.Mods.dlc_data[id]
 	if not Kristal.Mods.getMod(id) then
-		table.insert(self.loading_list, {
-			owner=data.repo_data.owner,
-			repo=data.repo_data.repo,
-			zipball=true
-		})
-		self.loading_queue_index = self.loading_queue_index + 1
-		self:setState("DOWNLOAD")
+		if HTTPS_AVAILABLE then
+			table.insert(self.loading_list, {
+				owner=data.repo_data.owner,
+				repo=data.repo_data.repo,
+				zipball=true
+			})
+			self.loading_queue_index = self.loading_queue_index + 1
+			self:setState("DOWNLOAD")
+		else
+			Assets.playSound("ui_cant_select")
+		end
 	else
 		local function recursivelyDelete(item)
 	        if love.filesystem.getInfo( item , "directory" ) then
