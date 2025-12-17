@@ -205,6 +205,24 @@ function MainMenuTitle:draw()
     Draw.draw(logo_img, SCREEN_WIDTH/2 - logo_img:getWidth()/2, 105 - logo_img:getHeight()/2)
     --Draw.draw(self.selected_mod and self.selected_mod.logo or self.logo, 160, 70)
 
+
+    local star = self.star
+    if star then
+        local starX, starY = SCREEN_WIDTH/2 - star:getWidth()/2, 105 - star:getHeight()/2
+        local backstar = self.backstar
+        if backstar then
+            local image = backstar.image
+            love.graphics.push()
+
+            love.graphics.setColor(1,1,1,backstar.opacity)
+            Draw.draw(backstar.image, starX + image:getWidth()/2, starY + image:getHeight()/2, 0, backstar.scaleX, backstar.scaleY, image:getWidth()/2, image:getHeight()/2)
+            love.graphics.setColor(1,1,1,1)
+
+            love.graphics.pop()
+        end
+        Draw.draw(star, starX, starY)
+    end
+
     for i, option in ipairs(self.options) do
         local date = os.date("*t")
         if date.month == 4 and date.day == 1 then
