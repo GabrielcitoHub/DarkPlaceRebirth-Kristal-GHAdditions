@@ -54,6 +54,7 @@ function item:init()
         mario = "Weege!",
         noel = "How can this defend at all?",
         ceroba = "A bowl...? okay",
+        len = "The best armour? hell yeah!"
     }
 end
 
