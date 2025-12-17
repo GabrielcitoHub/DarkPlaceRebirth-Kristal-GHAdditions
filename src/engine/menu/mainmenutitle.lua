@@ -11,11 +11,34 @@
 ---@overload fun(menu:MainMenu) : MainMenuTitle
 local MainMenuTitle, super = Class(StateClass)
 
+function MainMenuTitle:makeTitleLetter(image, x, y)
+    x = x or 0
+    y = y or 0
+
+    if not self.letters then self.letters = {} end
+    local letters = self.letters
+    local offset = 0.4
+    local letter = {
+        image = Assets.getTexture(image),
+        x = x,
+        y = y,
+        startX = x,
+        startY = y,
+        speed = 1,
+        amplitude = 20,
+        time = 0 + (offset * #letters),
+    }
+
+    table.insert(letters, letter)
+end
+
 function MainMenuTitle:init(menu)
     self.menu = menu
 
-    self.logo = Assets.getTexture("kristal/title_logo_shadow")
-    
+    -- self.logo = Assets.getTexture("kristal/title_logo_shadow")
+    local skin = ""
+    local letters
+    local spacing = 50
     local date = os.date("*t")
     if date.month == 4 and date.day == 1 then
         self.logo = Assets.getTexture("kristal/title_logo_sun")
@@ -202,7 +225,9 @@ end
 function MainMenuTitle:draw()
     local logo_img = self.menu.selected_mod and self.menu.selected_mod.logo or self.logo
 
-    Draw.draw(logo_img, SCREEN_WIDTH/2 - logo_img:getWidth()/2, 105 - logo_img:getHeight()/2)
+    if logo_img then
+        Draw.draw(logo_img, SCREEN_WIDTH/2 - logo_img:getWidth()/2, 105 - logo_img:getHeight()/2)
+    end
     --Draw.draw(self.selected_mod and self.selected_mod.logo or self.logo, 160, 70)
 
 
