@@ -19,6 +19,39 @@ function MainMenuTitle:init(menu)
     local date = os.date("*t")
     if date.month == 4 and date.day == 1 then
         self.logo = Assets.getTexture("kristal/title_logo_sun")
+    else
+        self.star = Assets.getTexture("kristal/title/big_star")
+        local scale = 1
+        local opacity = 0.4
+        self.backstar = {
+            image = Assets.getTexture("kristal/title/big_star"),
+            startScaleX = scale,
+            startScaleY = scale,
+            scaleX = scale,
+            scaleY = scale,
+            speed = 1,
+            amplitude = 0.3,
+            time = 0,
+            startOpacity = opacity,
+            opacity = opacity,
+        }
+        self.tagline = Assets.getTexture("kristal/title/tagline")
+        letters = "dark place"
+    end
+
+    if letters then
+        for i = 1,string.len(letters) do
+            local l = string.sub(letters, i, i)
+            -- print(i)
+            self:makeTitleLetter("kristal/title_logo_shadow/" .. skin .. l, 76 + (spacing * (i - 1)), 60)
+        end
+    end
+
+    local rng = love.math.random(1,10)
+    -- rng = 1
+    if rng == 1 then
+        self.catframe = 1
+        self.uiiai = Assets.getFrames("kristal/uiiai")
     end
 
     self.selected_option = 1
@@ -180,6 +213,37 @@ function MainMenuTitle:draw()
         else
             Draw.printShadow(option[2], 215, 219 + 32 * (i - 1))
         end
+    end
+
+    local tagline = self.tagline
+    if tagline then
+        Draw.draw(tagline, 206, 150)
+    end
+
+    local letters = self.letters
+    if letters then
+        for _, letter in ipairs(letters) do
+            if letter.image then
+                Draw.draw(letter.image, letter.x, letter.y)
+            end
+        end
+    end
+
+    local uiiai = self.uiiai
+    if uiiai then
+        local catframe = self.catframe
+        local catframes = uiiai
+        local offset = 20
+        local setframe = math.ceil(self.catframe)
+        catframe = catframe + 3 * DT
+        if setframe > #catframes then
+            if catframe >= #catframes + 1 then
+                catframe = 1
+            end
+            setframe = 1
+        end
+        Draw.draw(catframes[setframe], offset, offset, 0, 2, 2)
+        self.catframe = catframe
     end
 end
 
