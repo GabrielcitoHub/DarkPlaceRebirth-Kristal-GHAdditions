@@ -25,7 +25,35 @@ function MainMenuTitle:init(menu)
 end
 
 function MainMenuTitle:update()
-    -- Do nothing?
+    -- Do something!
+    local star = self.star
+    if star then
+        local backstar = self.backstar
+        if backstar then
+            local time = backstar.time + DT * backstar.speed
+            local change = math.sin(time) * backstar.amplitude
+            local changeOpacity = change
+            local limit = 0.05
+            if change < limit then
+                change = limit
+            end
+            backstar.scaleX = backstar.startScaleX + change
+            backstar.scaleY = backstar.startScaleY + change
+            backstar.opacity = backstar.startOpacity + changeOpacity
+            backstar.time = time
+        end
+    end
+
+    local letters = self.letters
+    if letters then
+        for _, letter in ipairs(letters) do
+            local time = letter.time + DT * letter.speed
+            letter.y = letter.startY + math.sin(time) * letter.amplitude
+            letter.time = time
+            -- print(letter.y)
+            -- print(letter.time)
+        end
+    end
 end
 
 function MainMenuTitle:registerEvents()
