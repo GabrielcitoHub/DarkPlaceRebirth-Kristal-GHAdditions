@@ -9,7 +9,7 @@ function badge:init()
     self.type = "badge"
 
     -- Menu description
-    self.description = "Allow Suzy to perform First Aid in battle, healing 25 HP for 0 TP!"
+    self.description = "Allow Hero to perform First Aid in battle, healing 25 HP for 0 TP!"
 
     -- The cost of putting it on
     self.badge_points = 1
@@ -19,11 +19,11 @@ function badge:init()
 end
 
 function badge:update(equipped)
-    if equipped and Game:hasPartyMember("suzy") and not Game:getPartyMember("suzy"):hasSpell("first_aid") then
-        Game:getPartyMember("suzy"):addSpell("first_aid")
+    if equipped and Game:hasPartyMember("hero") and not Game:getPartyMember("hero"):hasSpell("first_aid") then
+        Game:getPartyMember("hero"):addSpell("first_aid")
     end
-    if not equipped and Game:hasPartyMember("suzy") and Game:getPartyMember("suzy"):hasSpell("first_aid") then
-        Game:getPartyMember("suzy"):removeSpell("first_aid")
+    if not equipped and Game:hasPartyMember("hero") and Game:getPartyMember("hero"):hasSpell("first_aid") then
+        Game:getPartyMember("hero"):removeSpell("first_aid")
     end
 end
 

@@ -43,6 +43,9 @@ function actor:initChapter1()
 
     -- Table of sprite animations
     self.animations = {
+        -- Movement animations
+        ["slide"]               = {"slide", 4/30, true},
+
         -- Battle animations
         ["battle/idle"]         = {"battle/idle", 1/6, true},
 
@@ -91,7 +94,7 @@ function actor:initChapter1()
         ["walk_blush/up"] = "walk_blush/down",
         ["walk_blush/left"] = "walk_blush/left",
         ["walk_blush/right"] = "walk_blush/right",
-        
+
         ["walk_unhappy/down"] = "walk_unhappy/up",
         ["walk_unhappy/up"] = "walk_unhappy/down",
         ["walk_unhappy/left"] = "walk_unhappy/left",
@@ -110,6 +113,8 @@ function actor:initChapter1()
         ["walk_blush/left"] = {0, 0},
         ["walk_blush/right"] = {0, 0},
         ["walk_blush/up"] = {0, 0},
+
+        ["slide"] = {-2, 2},
 
         -- Battle offsets
         ["battle/idle"] = {-7, -2},
@@ -153,7 +158,7 @@ function actor:initChapter2()
 
     -- Hitbox for this actor in the overworld (optional, uses width and height by default)
     self.hitbox = {1, 28, 19, 14}
-    
+
     -- A table that defines where the Soul should be placed on this actor if they are a player.
     -- First value is x, second value is y.
     self.soul_offset = {10.5, 24}
@@ -210,6 +215,7 @@ function actor:initChapter2()
         -- Cutscene animations
         ["jump_fall"]           = {"fall", 1/5, true},
         ["jump_ball"]           = {"ball", 1/15, true},
+        ["jump_ball_slow"]      = {"ball", 4/30, true},
 
         ["laugh"]               = {"laugh", 4/30, true},
 
@@ -239,7 +245,7 @@ function actor:initChapter2()
         ["walk_unhappy/up"] = "walk_unhappy/down",
         ["walk_unhappy/left"] = "walk_unhappy/left",
         ["walk_unhappy/right"] = "walk_unhappy/right",
-        
+
         ["walk_blush/down"] = "walk_blush/up",
         ["walk_blush/up"] = "walk_blush/down",
         ["walk_blush/left"] = "walk_blush/left",

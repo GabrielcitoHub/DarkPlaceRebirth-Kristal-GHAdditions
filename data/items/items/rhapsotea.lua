@@ -40,8 +40,12 @@ function item:init()
         susie = "Sounds kinda like Noelle.",
         ralsei = "... the hymn of the prophecy.",
         noelle = "(... Kris would never join choir...)",
-        ceroba = "Is it... Singing?",
-        jamm = "Brings me back..."
+        ceroba = "Choir in a teapot?",
+        jamm = "Brings me back...",
+        calypso = {
+            calypso = "(Jamm's singing...)",
+            jamm = "...What's with that look, Callie?",
+        },
     }
 end
 

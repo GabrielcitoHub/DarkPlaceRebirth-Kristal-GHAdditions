@@ -19,8 +19,10 @@ function character:init()
     -- Default title / class (saved to the save file)
     if Game.chapter <= 3 then
         self.title = "Dark Knight\nDoes damage using\ndark energy."
-    else
+    elseif Game.chapter == 4 then
         self.title = "Dark Hero\nCarries out fate\nwith the blade."
+    elseif Game.chapter >= 5 then
+        self.title = "Violent Violet\nFor that special\nsomeone."
     end
 
 	self.icon_color = {234/255, 121/255, 200/255}
@@ -53,8 +55,10 @@ function character:init()
         self.health = 140
     elseif Game.chapter == 3 then
         self.health = 190
-    else
+    elseif Game.chapter == 4 then
         self.health = 230
+    elseif Game.chapter >= 5 then
+        self.health = 290
     end
 
     -- Base stats (saved to the save file)
@@ -79,9 +83,16 @@ function character:init()
             defense = 2,
             magic = 2
         }
-    else
+    elseif Game.chapter == 4 then
         self.stats = {
             health = 230,
+            attack = 22,
+            defense = 2,
+            magic = 3
+        }
+    elseif Game.chapter >= 5 then
+        self.stats = {
+            health = 290,
             attack = 22,
             defense = 2,
             magic = 3
@@ -98,14 +109,24 @@ function character:init()
         }
     elseif Game.chapter == 3 then
         self.max_stats = {
-            health = 240
+            health = 240,
+            attack = 20,
+            magic = 4
         }
-    else
+    elseif Game.chapter == 4 then
         self.max_stats = {
-            health = 290
+            health = 290,
+            attack = 24,
+            magic = 5
+        }
+    elseif Game.chapter >= 5 then
+        self.max_stats = {
+            health = 340,
+            attack = 24,
+            magic = 5
         }
     end
-    
+
     -- Party members which will also get stronger when this character gets stronger, even if they're not in the party
     self.stronger_absent = {"kris","susie","ralsei"}
     -- For some reason, we emptied the max_stats table. This preserves that old behavior.

@@ -17,6 +17,7 @@ return{
         local susie = cutscene:getCharacter("susie")
         local dess = cutscene:getCharacter("dess")
         local jamm = cutscene:getCharacter("jamm") or cutscene:getCharacter("jammarcy")
+        local len = cutscene:getCharacter("len")
 
         local dess_speen = false
         local hero_karma = Game:getPartyMember("hero"):getFlag("karma")
@@ -74,6 +75,17 @@ return{
                     if dess_timer > 1/30 then
                         dess_timer = 0
                         DessRotate(dess:getFacing())
+                    end
+                end)
+            end
+            if len then
+                cutscene:walkTo(len, 408, 308, 1)
+                cutscene:during(function()
+                    if len.x == 408 then
+                        Assets.playSound("wing")
+                        len:setSprite("sit")
+                        len.scale_x = len.scale_x * -1
+                        return false
                     end
                 end)
             end
@@ -226,6 +238,15 @@ return{
                 cutscene:wait(5)
             end
 
+            if len then
+                if #Game.party > 1 then
+                    cutscene:textTagged("* ...", "neutral", "len")
+                    cutscene:textTagged("* Whatever happens up there,[wait:5] i think we're ready to face it!", "happy", "len")
+                    cutscene:textTagged("* ...[wait:5]Even if that means i woul-", "happy_nervous", "len", {auto = true})
+                    len:alert()
+                end
+            end
+
             elevator.volcount = 0
             elevator.rectspeed = 0
             elevator.maxrectspeed = 0
@@ -281,6 +302,9 @@ return{
             if jamm then
                 jamm:setSprite("battle/swooned_1")
             end
+            if len then
+                len:setSprite("fell")
+            end
 
             cutscene:wait(2)
             cutscene:wait(cutscene:fadeIn(2))
@@ -319,6 +343,10 @@ return{
             if susie then susie:setFacing("right") end
             if jamm then jamm:setFacing("right") end
             if dess then dess:setFacing("up") end
+            if len then
+                len.scale_x = len.scale_x * -1
+                len:setFacing("left")
+            end
 
             cutscene:wait(1)
             cutscene:showNametag("hero")
@@ -327,6 +355,10 @@ return{
 
             cutscene:interpolateFollowers()
             Game:setFlag("elevator_top", true)
+
+            if len then
+                cutscene:textTagged("* (...[wait:5]Maybe it's better if they don't know.)", "neutral_closed", "len")
+            end
         end
     end
 }

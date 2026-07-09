@@ -331,7 +331,7 @@ local cliffside = {
             cutscene:wait(time)
             time = time - plir
         end
-        Game.world.player.slide_sound:stop()
+        Game.world.player.slide_state.slide_sound:stop()
 
         Game.world.player:setState("WALK")
         Assets.playSound("jump", 1, 0.5)

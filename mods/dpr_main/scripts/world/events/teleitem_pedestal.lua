@@ -28,45 +28,74 @@ end
 function TeleitemPedestal:onInteract(player, dir)
     local darkInventory = Game.inventory:getDarkInventory()
     local items = darkInventory.stored_items
+
+    local found_item
+    for item,info in pairs(items) do
+        local preUse = item.onPrePedestalUse
+        local use = item.onPedestalUse
+        local postUse = item.onPostPedestalUse
+        local selectable = item.onPedestalSelect and item:onPedestalSelect()
+        print(selectable)
+        if selectable == nil then selectable = true end
+
+        if type(item) == "table" and (preUse or use or postUse) and selectable then
+            found_item = item
+            break
+        end
+    end
+
     Game.world:startCutscene(function(cutscene)
-        for item,info in pairs(items) do
-            -- print("item = " .. v)
-            -- print("storage = " .. v.storage)
-            -- print("index = " .. v.index)
-            -- local item = Registry.createItem(itemName)
-            if type(item) == "table" then
-                if item.pedestalPreUse or item.pedestalUse or item.pedestalUsed then
-                    -- print("pedestal item found")
-                    Assets.playSound("celestial_hit")
+        if found_item then
+            local item = found_item
+            local preUse = item.onPrePedestalUse
+            local use = item.onPedestalUse
+            local postUse = item.onPostPedestalUse
 
-                    if item.pedestalPreUse then
-                        -- print("Preuse")
-                        item:pedestalPreUse(cutscene)
+            local wait_time = 1
+            local use_text = "* (Your [color:yellow]" .. item.name .. "[color:reset] glided towards the pedestal!)"
+
+            if preUse or use or postUse then
+                Assets.playSound("celestial_hit")
+
+                if preUse then
+                    local function checkReturn(result)
+                        local resultType = type(result)
+                        if resultType == true then
+                            return
+                        elseif resultType == "string" then
+                            use_text = result
+                        elseif resultType == "number" then
+                            wait_time = result
+                        elseif resultType == "table" then
+                            for _,v in ipairs(result) do
+                                checkReturn(v)
+                            end
+                        end
                     end
 
-                    self.active = true
-                    cutscene:text("* (Your [color:yellow]" .. item.name .. "[color:reset] glided towards the pedestal!)")
-                    cutscene:wait(1)
-                    Game.world.music:pause()
-
-                    if item.pedestalUse then
-                        -- print("Use")
-                        item:pedestalUse(cutscene)
-                    end
-
-                    self.active = false
-
-                    if item.pedestalUsed then
-                        -- print("Used")
-                        item:pedestalUsed(cutscene)
-                    end
-
-                    Game.world.music:play()
-                    return
+                    checkReturn(preUse(item, cutscene))
                 end
+
+                self.active = true
+
+                cutscene:text(use_text)
+                cutscene:wait(wait_time)
+
+                if use then
+                    use(item, cutscene)
+                end
+
+                self.active = false
+
+                if postUse then
+                    postUse(item, cutscene)
+                end
+
+                return
             end
         end
-        cutscene:text("* (Seems like you got ... [wait:1]\n   nothing special...)")
+
+        cutscene:text("* (Seems like you got! [wait:1]\n      nothing special...)")
     end)
 end
 

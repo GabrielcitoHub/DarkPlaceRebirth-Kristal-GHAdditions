@@ -78,7 +78,7 @@ function DarkMenu:getDotSpacing()
     if #self.buttons <= 8 then
         return 50
     else
-        return 50 - Utils.round((#self.buttons/3*#self.buttons/3))
+        return 50 - MathUtils.round((#self.buttons/3*#self.buttons/3))
     end
 end
 
@@ -112,8 +112,8 @@ function DarkMenu:addButtons()
         ["desc_sprite"]    = Assets.getTexture("ui/menu/desc/item"),
         ["callback"]       = function()
             self.box = DarkItemMenu()
-            self.box.layer = 1
-            self:addChild(self.box)
+            self.box.layer = self.layer + 1
+            Game.world:addChild(self.box)
 
             self.ui_select:stop()
             self.ui_select:play()
@@ -128,8 +128,8 @@ function DarkMenu:addButtons()
         ["desc_sprite"]    = Assets.getTexture("ui/menu/desc/equip"),
         ["callback"]       = function()
             self.box = DarkEquipMenu()
-            self.box.layer = 1
-            self:addChild(self.box)
+            self.box.layer = self.layer + 1
+            Game.world:addChild(self.box)
 
             self.ui_select:stop()
             self.ui_select:play()
@@ -144,8 +144,8 @@ function DarkMenu:addButtons()
         ["desc_sprite"]    = Assets.getTexture("ui/menu/desc/power"),
         ["callback"]       = function()
             self.box = DarkPowerMenu()
-            self.box.layer = 1
-            self:addChild(self.box)
+            self.box.layer = self.layer + 1
+            Game.world:addChild(self.box)
 
             self.ui_select:stop()
             self.ui_select:play()
@@ -159,7 +159,8 @@ function DarkMenu:addButtons()
         ["hovered_sprite"] = Assets.getTexture("ui/menu/btn/talk_h"),
         ["desc_sprite"]    = Assets.getTexture("ui/menu/desc/talk"),
         ["callback"]       = function()
-            Game.world:startCutscene("_talk", "main", Game.world.map.id, Game.party[1].id)
+            Game.world.map.talk_count = (Game.world.map.talk_count or 0) + 1
+            Game.world:startCutscene("_talk", "main", Game.world.map.id, Game.party[1].id, Game.world.map.talk_count)
 
             self.ui_select:stop()
             self.ui_select:play()
@@ -210,8 +211,8 @@ function DarkMenu:addButtons()
         ["desc_sprite"]    = Assets.getTexture("ui/menu/desc/config"),
         ["callback"]       = function()
             self.box = DarkConfigMenu()
-            self.box.layer = -1
-            self:addChild(self.box)
+            self.box.layer = self.layer - 1
+            Game.world:addChild(self.box)
 
             self.ui_select:stop()
             self.ui_select:play()
@@ -284,7 +285,7 @@ function DarkMenu:onKeyPressed(key)
         return
     end
 
-    if not self.animation_done then return end
+    if (not self.animation_done) and self.animate_out then return end
 
     if self.state == "MAIN" then
         local old_selected = self.selected_submenu

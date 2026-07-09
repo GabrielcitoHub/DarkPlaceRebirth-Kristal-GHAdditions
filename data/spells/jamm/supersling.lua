@@ -44,6 +44,10 @@ function spell:onCast(user, target)
     if Game:getFlag("healsling_plus") then
         damage = math.floor((user.chara:getStat("attack") * 30))
     end
+    
+    if (Game.battle and Game.battle.headwind > 0) then
+        damage = math.floor(damage * 1.25)
+    end
 
 	local function generateSlash(scale_x)
 		local cutAnim = Sprite("effects/attack/sling")
@@ -80,6 +84,10 @@ function spell:onCast(user, target)
         
         if Game:getFlag("jamm_skill_9") then
             mult = mult * 1.5
+        end
+    
+        if (Game.battle and Game.battle.headwind > 0) then
+            mult = math.floor(mult * 1.25)
         end
         
 		target:heal(damage)

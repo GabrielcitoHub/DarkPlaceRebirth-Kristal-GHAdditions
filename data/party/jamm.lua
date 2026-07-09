@@ -106,6 +106,16 @@ function character:init()
     end
 end
 
+function character:getStat(name, default, light)
+    local dmg = super.getStat(self, name, default, light)
+    
+    if (Game.battle and Game.battle.headwind > 0) and name == "attack" then
+        dmg = math.floor(dmg * 1.25)
+    end
+    
+    return dmg
+end
+
 function character:getElements()
     local e = {"ELEC"}
     if Game:getFlag("marcy_joined") then

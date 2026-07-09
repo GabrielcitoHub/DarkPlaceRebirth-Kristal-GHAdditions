@@ -49,10 +49,10 @@ function item:init()
         ralsei = "This looks quite lovely for something so old!",
         noelle = "This is uncomfortable...",
         dess = "ewwwwww old games suck i only like rtx games",
-        jamm = "heyyy jamm write you own thing here okay? cool",
-        ["jamm+marcy"] = "heyyy jamm write you own thing here okay? cool",
+        jamm = "I always forget how high up to put these...",
+        calypso = "This be uncomfortable...",
         noel = "dunno",
-        ceroba = "dunno",
+        ceroba = "It's a struggle to even put it on...",
     }
 end
 

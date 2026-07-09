@@ -2,6 +2,11 @@ local MainHub, super = Class(Map)
 
 function MainHub:onEnter()
     super.onEnter(self)
+    if Game.world:getPartyCharacterInParty("len") then
+        local lenNpc = Game.world:getCharacter("len")
+        lenNpc:remove()
+    end
+
     if DTRANS then
         Game.world:startCutscene("darkenter")
     end

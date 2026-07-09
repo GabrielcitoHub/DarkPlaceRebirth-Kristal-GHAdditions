@@ -56,7 +56,7 @@
 ---@field acts              table<table>        *(Used internally)* Stores the data of all ACTs available on this enemy
 ---
 ---@field hurt_timer        number              How long this enemy's hurt sprite should be displayed for when hit
----@field comment           string              The text displayed next to this enemy's name in menu's (such as "(Tired)" in DELTARUNE) 
+---@field comment           string              The text displayed next to this enemy's name in menu's (such as "(Tired)" in DELTARUNE)
 ---@field defeated          boolean             Whether this enemy has been defeated
 ---
 ---@field temporary_mercy           number              The current amount of temporary mercy
@@ -196,7 +196,7 @@ function EnemyBattler:getGrazeTension()
 end
 
 ---@param bool          boolean New tired state
----@param hide_message? boolean Hides the "TIRED" or "AWAKE" message (if it would otherwise have been shown) if set to `true`. 
+---@param hide_message? boolean Hides the "TIRED" or "AWAKE" message (if it would otherwise have been shown) if set to `true`.
 function EnemyBattler:setTired(bool, hide_message)
     local old_tired = self.tired
     self.tired = bool
@@ -204,7 +204,7 @@ function EnemyBattler:setTired(bool, hide_message)
         self.comment = "(Tired)"
         if Game:getConfig("tiredMessages") and not old_tired and not hide_message then
             -- Enemies can't spawn TIRED messages safely until fully initialised and parented.
-            -- To keep this function safe to use in `init()`, we must therefore check `self.parent` exists before trying to spawn the message. 
+            -- To keep this function safe to use in `init()`, we must therefore check `self.parent` exists before trying to spawn the message.
             if self.parent then
                 self:statusMessage("msg", "tired")
                 Assets.playSound("spellcast", 0.5, 0.9)
@@ -224,7 +224,7 @@ end
 ---@param description?  string          The short description of the act that appears in the menu
 ---@param party?        string[]|string A list of party member ids required to use this act. Alternatively, the keyword `"all"` can be used to insert the entire current party
 ---@param tp?           number          An amount of TP required to use this act
----@param highlight?    Battler[]       A list of battlers that will be highlighted when the act is used, overriding default highlighting logic             
+---@param highlight?    Battler[]       A list of battlers that will be highlighted when the act is used, overriding default highlighting logic
 ---@param icons?        string[]        A list of texture paths to icons that will display next to the name of this act (party member heads are drawn automatically as required)
 ---@return table act    The data of the act, also added to the `acts` table
 function EnemyBattler:registerAct(name, description, party, tp, highlight, icons)
@@ -264,7 +264,7 @@ end
 ---@param description?  string          The short description of the act that appears in the menu
 ---@param party?        string[]|string A list of party member ids required to use this act. Alternatively, the keyword `"all"` can be used to insert the entire current party
 ---@param tp?           number          An amount of TP required to use this act
----@param highlight?    Battler[]       A list of battlers that will be highlighted when the act is used, overriding default highlighting logic             
+---@param highlight?    Battler[]       A list of battlers that will be highlighted when the act is used, overriding default highlighting logic
 ---@param icons?        string[]        A list of texture paths to icons that will display next to the name of this act (party member heads are drawn automatically as required)
 ---@return table act    The data of the act, also added to the `acts` table
 function EnemyBattler:registerShortAct(name, description, party, tp, highlight, icons)
@@ -305,7 +305,7 @@ end
 ---@param description?  string          The short description of the act that appears in the menu
 ---@param party?        string[]|string A list of party member ids required to use this act. Alternatively, the keyword `"all"` can be used to insert the entire current party
 ---@param tp?           number          An amount of TP required to use this act
----@param highlight?    Battler[]       A list of battlers that will be highlighted when the act is used, overriding default highlighting logic             
+---@param highlight?    Battler[]       A list of battlers that will be highlighted when the act is used, overriding default highlighting logic
 ---@param icons?        string[]        A list of texture paths to icons that will display next to the name of this act (party member heads are drawn automatically as required)
 function EnemyBattler:registerActFor(char, name, description, party, tp, highlight, icons)
     if type(party) == "string" then
@@ -344,7 +344,7 @@ end
 ---@param description?  string          The short description of the act that appears in the menu
 ---@param party?        string[]|string A list of party member ids required to use this act. Alternatively, the keyword `"all"` can be used to insert the entire current party
 ---@param tp?           number          An amount of TP required to use this act
----@param highlight?    Battler[]       A list of battlers that will be highlighted when the act is used, overriding default highlighting logic             
+---@param highlight?    Battler[]       A list of battlers that will be highlighted when the act is used, overriding default highlighting logic
 ---@param icons?        string[]        A list of texture paths to icons that will display next to the name of this act (party member heads are drawn automatically as required)
 function EnemyBattler:registerShortActFor(char, name, description, party, tp, highlight, icons)
     if type(party) == "string" then
@@ -539,8 +539,6 @@ function EnemyBattler:addTemporaryMercy(amount, play_sound, clamp, kill_conditio
                 self.temporary_mercy_percent = self:statusMessage("msg", "miss")
                 self.temporary_mercy_percent.kill_condition = kill_condition
                 self.temporary_mercy_percent.kill_others = true
-                -- In Deltarune, the mercy percent takes a bit more time to start to fade out after the enemy's turn ends
-                self.temporary_mercy_percent.kill_delay = 30
             else
                 self.temporary_mercy_percent:setDisplay("msg", "miss")
             end
@@ -549,7 +547,6 @@ function EnemyBattler:addTemporaryMercy(amount, play_sound, clamp, kill_conditio
                 self.temporary_mercy_percent = self:statusMessage("mercy", self.temporary_mercy)
                 self.temporary_mercy_percent.kill_condition = kill_condition
                 self.temporary_mercy_percent.kill_others = true
-                self.temporary_mercy_percent.kill_delay = 30
 
                 -- Only play the mercyadd sound when the DamageNumber is first shown
                 if play_sound ~= false then
@@ -629,7 +626,7 @@ function EnemyBattler:getNameColors()
                 end
             end
             if can_pacify then
-                tiredcol = Utils.mergeColor(tiredcol, COLORS.white, 0.5 + math.sin(Game.battle.pacify_glow_timer / 4) * 0.5)
+                tiredcol = ColorUtils.mergeColor(tiredcol, COLORS.white, 0.5 + math.sin(Game.battle.pacify_glow_timer / 4) * 0.5)
             end
         end
         table.insert(result, tiredcol)
@@ -1020,6 +1017,37 @@ function EnemyBattler:freeze()
     self:defeat("FROZEN", true)
 end
 
+--- Darkens this enemy and defeats them with the reason `"DARKENED"` \
+--- If this enemy can not be darkened, it acts as if it was defeated though violence normally instead
+function EnemyBattler:darkify()
+    if not self.can_darken then
+        self:onDefeat()
+        return
+    end
+
+    Assets.playSound("petrify")
+
+    self:toggleOverlay(true)
+
+    local sprite = self:getActiveSprite()
+    if not sprite:setAnimation("darkened") then
+        sprite:setAnimation("hurt")
+    end
+    sprite:stopShake()
+
+    self:recruitMessage("darkened")
+
+    self.hurt_timer = -1
+
+    sprite.darkened = true
+    sprite.darkened_progress = 0
+
+    Game.battle.timer:tween(20 / 30, sprite, { darkened_progress = 1 })
+
+    Game.battle.money = Game.battle.money + 44
+    self:defeat("DARKENED", true)
+end
+
 --- An override of [`Battler:statusMessage()`](lua://Battler.statusMessage) that positions the message for this EnemyBattler
 ---@param ... unknown
 ---@return DamageNumber
@@ -1059,12 +1087,12 @@ function EnemyBattler:defeat(reason, violent)
     if violent then
         Game.battle.used_violence = true
         if self:isRecruitable() and self:getRecruitStatus() ~= false then
-            if Game:getConfig("enableRecruits") and self.done_state ~= "FROZEN" then
+            if Game:getConfig("enableRecruits") and self.done_state ~= "FROZEN" and self.done_state ~= "DARKENED" then
                 self:recruitMessage("lost")
             end
             self:setRecruitStatus(false)
         end
-        if self.done_state == "KILLED" or self.done_state == "FROZEN" then
+        if self.done_state == "KILLED" or self.done_state == "FROZEN" or self.done_state == "DARKENED"then
             Game.battle.killed = true
             for i, battler in ipairs(Game.battle.party) do
                 battler.chara.kills = battler.chara.kills + 1
@@ -1077,6 +1105,8 @@ function EnemyBattler:defeat(reason, violent)
             end
             if self.done_state == "FROZEN" then
                 Game.battle.freeze_xp = Game.battle.freeze_xp + self.experience
+            elseif self.done_state == "DARKENED" then
+                Game.battle.dark_xp = Game.battle.dark_xp + self.experience
             else
                 Game.battle.xp = Game.battle.xp + self.experience
             end
@@ -1144,7 +1174,7 @@ function EnemyBattler:update()
         end
     end
 
-    if self.temporary_mercy_percent and self.temporary_mercy_percent.kill_condition_succeed then
+    if self.temporary_mercy_percent and (self.temporary_mercy_percent.kill_condition_succeed or self.temporary_mercy_percent:isRemoved()) then
         self.mercy = MathUtils.clamp(self.mercy + self.temporary_mercy, 0, 100)
         self.temporary_mercy = 0
         self.temporary_mercy_percent = nil

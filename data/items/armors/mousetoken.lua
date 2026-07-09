@@ -51,8 +51,9 @@ function item:init()
         dess = "ermmm possible chuck-e-cheese reference?",
         jamm = "This brings back memories.",
         ["jamm+marcy"] = "Marcy wants to go there! // Maybe soon, Marcy.",
+        calypso = "This skull be deformed...",
         noel = "Is this from a resturant?",
-        ceroba = "Isn't that just a normal coin?",
+        ceroba = "Looks like a normal coin.",
         suzy = "Rest In Pepperonis",
     }
 end

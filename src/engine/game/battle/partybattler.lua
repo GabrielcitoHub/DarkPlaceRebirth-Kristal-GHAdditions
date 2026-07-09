@@ -139,7 +139,6 @@ function PartyBattler:hurt(amount, exact, color, options)
     local swoon = options["swoon"]
 
     if not options["all"] then
-        Assets.playSound("hurt")
         if not exact then
             amount = self:calculateDamage(amount)
             if self.defending then
@@ -153,7 +152,10 @@ function PartyBattler:hurt(amount, exact, color, options)
             amount = item:onBattleDamage(amount, swoon, false) or amount
         end
 
-        self:removeHealth(amount, swoon)
+        local dealt_damage, override_swoon = self:removeHealth(amount, swoon)
+        amount = dealt_damage
+        swoon = override_swoon or swoon
+        if dealt_damage then Assets.playSound("hurt") end
     else
         -- We're targeting everyone.
         if not exact then
@@ -207,34 +209,85 @@ end
 ---@param amount number
 ---@param swoon boolean? Whether to swoon rather than down
 function PartyBattler:removeHealth(amount, swoon)
+    local dealt_damage
+    local override_dmg, override_swoon
+    if self.chara.onPreHurt then
+        override_dmg, override_swoon = self.chara:onPreHurt(amount, swoon)
+    end
+    if override_dmg == true then return end
+    amount = override_dmg or amount
+    swoon = override_swoon or swoon
     if (self.chara:getHealth() <= 0) then
         amount = MathUtils.round(amount / 4)
+        dealt_damage = amount
         self.chara:setHealth(self.chara:getHealth() - amount)
+        if self.chara.onHurt then
+            self.chara:onHurt(self.chara:getHealth() - amount)
+        end
+        if self.chara.onPostHurt then
+            self.chara:onPostHurt(self.chara:getHealth() - amount, false)
+        end
     else
         self.chara:setHealth(self.chara:getHealth() - amount)
+        if self.chara.onHurt then
+            self.chara:onHurt(self.chara:getHealth() - amount)
+        end
         if (self.chara:getHealth() <= 0) then
             if swoon then
+                dealt_damage = -999
                 self.chara:setHealth(-999)
+                if self.chara.onPostHurt then
+                    self.chara:onPostHurt(-999, true)
+                end
             else
                 amount = math.abs((self.chara:getHealth() - (self.chara:getStat("health") / 2)))
+                dealt_damage = self.chara:getStat("health") / 2
                 self.chara:setHealth(MathUtils.round(((-self.chara:getStat("health")) / 2)))
+                if self.chara.onPostHurt then
+                    self.chara:onPostHurt(MathUtils.round(((-self.chara:getStat("health")) / 2)), false)
+                end
+            end
+        else
+            if self.chara.onPostHurt then
+                self.chara:onPostHurt(amount, false)
             end
         end
     end
     self:checkHealth(swoon)
+    return dealt_damage or amount, swoon
 end
 
 --- A variant of [`PartyBattler:removeHealth()`](lua://PartyBattler.removeHealth) that uses Kris' (or the first party member)'s HP for downed hp values (used for deltarune accuracy)
 ---@param amount number
 ---@param swoon boolean? Whether to swoon rather than down
 function PartyBattler:removeHealthBroken(amount, swoon)
+    local override_dmg, override_swoon
+    if self.chara.onPreHurt then
+        override_dmg, override_swoon = self.chara:onPreHurt(amount, swoon)
+    end
+    if override_dmg == true then return end
+    amount = override_dmg or amount
+    swoon = override_swoon or swoon
     self.chara:setHealth(self.chara:getHealth() - amount)
+    if self.chara.onHurt then
+        self.chara:onHurt(self.chara:getHealth() - amount)
+    end
     if (self.chara:getHealth() <= 0) then
         if swoon then
             self.chara:setHealth(-999)
+            if self.chara.onPostHurt then
+                self.chara:onPostHurt(-999, true)
+            end
         else
             -- BUG: Use Kris' max health...
             self.chara:setHealth(MathUtils.round(((-Game.party[1]:getStat("health")) / 2)))
+            if self.chara.onPostHurt then
+                self.chara:onPostHurt(MathUtils.round(((-Game.party[1]:getStat("health")) / 2)), false)
+            end
+        end
+    else
+        if self.chara.onPostHurt then
+            self.chara:onPostHurt(amount, false)
         end
     end
     self:checkHealth(swoon)
@@ -409,7 +462,6 @@ end
 ---@param loop?     boolean
 ---@param after?    fun(ActorSprite)
 function PartyBattler:setActSprite(sprite, ox, oy, speed, loop, after)
-
     self:setCustomSprite(sprite, ox, oy, speed, loop, after)
 
     local x = self.x - (self.actor:getWidth() / 2 - ox) * 2

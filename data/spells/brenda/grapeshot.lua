@@ -61,6 +61,11 @@ end
 
 function spell:getDamage(user, target)
     local damage = math.ceil(love.math.random(user.chara:getStat("attack"), user.chara:getStat("attack") * 20) - (target.defense * 2))
+    
+    if (Game.battle and Game.battle.headwind > 0) then
+        damage = math.floor(damage * 1.25)
+    end
+    
     return damage
 end
 

@@ -74,6 +74,10 @@ function spell:onCast(user, target)
         damage = damage/target:getResistance("STAR")
         damage = damage/target:getResistance("DARK")
     end
+    
+    if (Game.battle and Game.battle.headwind > 0) then
+        damage = math.floor(damage * 1.25)
+    end
 
 	local function generateSlash(scale_x)
 		local cutAnim = Sprite("effects/attack/sling")
@@ -110,6 +114,10 @@ function spell:onLightCast(user, target)
 	if target.boss then
 		damage = math.floor((((user.chara:getStat("attack") * 13) / 10) - 3 * (target.defense)) * 1.7)
 	end
+    
+    if (Game.battle and Game.battle.headwind > 0) and name == "attack" then
+        damage = math.floor(damage * 1.25)
+    end
 
 	local function generateSlash(scale_x)
 		local cutAnim = Sprite("effects/attack/sling")

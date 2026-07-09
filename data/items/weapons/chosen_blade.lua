@@ -48,6 +48,7 @@ function item:init()
         kris = true,
         hero = true,
         suzy = true,
+        len = true,
     }
 
     -- Character reactions
@@ -60,8 +61,10 @@ function item:init()
         dess = "little ol' me a hero? surely you're jestin",
         brenda = "Swords aren't really my style.",
         jamm = "What do I look like, the main character?",
+        calypso = "Ye got the wrong lass.",
         ceroba = "Chosen? I think you got the wrong person.",
         noel = "Overhyped, Underused, yet VERY Interesting...",
+        len = "Im the main character now!",
     }
 end
 

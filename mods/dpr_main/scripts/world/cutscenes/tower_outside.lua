@@ -1,4 +1,47 @@
 return {
+    ---@param cutscene WorldCutscene
+    ---@param event Event
+    glassbridge = function(cutscene, event)
+        local Dlc = "dlc_acidlake"
+        local hasDlc = Game:hasDLC(Dlc)
+
+        if not hasDlc then
+            local fun = Game:getFlag("FUN")
+            local chance = MathUtils.randomInt(1,666)
+            local probs = {66, 55, 44, 33, 22, 11}
+            local flag = "abnormalGlassbridgeDLCVision"
+            local seen = Game:getFlag(flag)
+
+            for _,v in pairs(probs) do
+                probs[v] = true
+            end
+
+            cutscene:text("* (Something is stopping you from going further)")
+
+            local check = (fun >= 6 and fun < 21) and probs[chance] and not seen
+            if check then
+                cutscene:text("* (For some reason...[wait:5] just for a brief moment...)")
+                cutscene:text("* (You though you saw a blue hoodied figure staring at you...)")
+                Game:setFlag(flag, true)
+            else
+                cutscene:text("* (Are you missing the \"" .. Dlc .. "\" dlc?)")
+            end
+
+            return
+        end
+
+        cutscene:text("* (Do you want to travel?)[wait:5]\n* (This may take a while...)")
+
+        local c = cutscene:choicer({"Yes", "No"})
+        if c == 2 then
+            cutscene:text("* (You travelen't)")
+            return
+        end
+
+        Game:swapIntoMod(Dlc, false, "main/entrance")
+    end,
+
+    ---@param cutscene WorldCutscene
     lazul = function(cutscene)
         local quest = Game:getFlag("package_quest")
         if quest and quest == 1 then
@@ -26,6 +69,8 @@ return {
         end
     end,
     
+    ---@param cutscene WorldCutscene
+    ---@param event Event
 	start = function(cutscene, event)
         local hero = cutscene:getCharacter("hero")
 	    Game.world.music:pause()
@@ -52,6 +97,8 @@ return {
         Game:getQuest("wherethefuck"):unlock()
 	end,
 
+    ---@param cutscene WorldCutscene
+    ---@param event Event
     trans = function(cutscene, event)
         if love.math.random(1, 100) <= 5 and Game:getFlag("egg_h", false) then
             cutscene:mapTransition("tower/hell/hell_egg", "spawn")
@@ -76,6 +123,8 @@ return {
         end
     end,
 
+    ---@param cutscene WorldCutscene
+    ---@param event Event
     egg = function(cutscene, event)
         cutscene:text("* Well,[wait:5] there is a man here.")
         local item = "egg"

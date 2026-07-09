@@ -1,7 +1,7 @@
 return {
-  version = "1.10",
+  version = "1.11",
   luaversion = "5.1",
-  tiledversion = "1.10.2",
+  tiledversion = "1.12.2",
   class = "",
   orientation = "orthogonal",
   renderorder = "right-down",
@@ -9,8 +9,8 @@ return {
   height = 27,
   tilewidth = 40,
   tileheight = 40,
-  nextlayerid = 12,
-  nextobjectid = 98,
+  nextlayerid = 45,
+  nextobjectid = 99,
   properties = {
     ["border"] = "mainhub",
     ["music"] = "mainhub",
@@ -20,20 +20,286 @@ return {
     {
       name = "main_area",
       firstgid = 1,
-      filename = "../../../tilesets/main_area.tsx",
-      exportfilename = "../../../tilesets/main_area.lua"
+      class = "",
+      tilewidth = 20,
+      tileheight = 20,
+      spacing = 0,
+      margin = 0,
+      columns = 13,
+      image = "../../../../../assets/sprites/tilesets/main_area.png",
+      imagewidth = 260,
+      imageheight = 320,
+      objectalignment = "unspecified",
+      tilerendersize = "grid",
+      fillmode = "stretch",
+      tileoffset = {
+        x = 0,
+        y = 0
+      },
+      grid = {
+        orientation = "orthogonal",
+        width = 40,
+        height = 40
+      },
+      properties = {},
+      wangsets = {},
+      tilecount = 208,
+      tiles = {}
     },
     {
       name = "other-objects",
       firstgid = 209,
-      filename = "../../../tilesets/other-objects.tsx",
-      exportfilename = "../../../tilesets/other-objects.lua"
+      class = "",
+      tilewidth = 57,
+      tileheight = 70,
+      spacing = 0,
+      margin = 0,
+      columns = 0,
+      objectalignment = "unspecified",
+      tilerendersize = "tile",
+      fillmode = "stretch",
+      tileoffset = {
+        x = 0,
+        y = 0
+      },
+      grid = {
+        orientation = "orthogonal",
+        width = 1,
+        height = 1
+      },
+      properties = {},
+      wangsets = {},
+      tilecount = 5,
+      tiles = {
+        {
+          id = 0,
+          image = "../../../../../assets/sprites/world/maps/nothing/face_tbody.png",
+          width = 49,
+          height = 13
+        },
+        {
+          id = 1,
+          image = "../../../../../assets/sprites/world/events/gdoor_1.png",
+          width = 36,
+          height = 52
+        },
+        {
+          id = 2,
+          image = "../../../../../assets/sprites/world/events/sansstation.png",
+          width = 57,
+          height = 70
+        },
+        {
+          id = 3,
+          image = "../../../../../assets/sprites/world/events/sign_8bit.png",
+          width = 16,
+          height = 16
+        },
+        {
+          id = 4,
+          image = "../../../../../assets/sprites/world/events/sign.png",
+          width = 20,
+          height = 20
+        }
+      }
     },
     {
       name = "bright forest",
-      firstgid = 213,
-      filename = "../../../tilesets/bright forest.tsx",
-      exportfilename = "../../../tilesets/bright forest.lua"
+      firstgid = 214,
+      class = "",
+      tilewidth = 40,
+      tileheight = 40,
+      spacing = 0,
+      margin = 0,
+      columns = 11,
+      image = "../../../../../assets/sprites/tilesets/bright forest.png",
+      imagewidth = 440,
+      imageheight = 1080,
+      objectalignment = "unspecified",
+      tilerendersize = "tile",
+      fillmode = "stretch",
+      tileoffset = {
+        x = 0,
+        y = 0
+      },
+      grid = {
+        orientation = "orthogonal",
+        width = 40,
+        height = 40
+      },
+      properties = {},
+      wangsets = {},
+      tilecount = 297,
+      tiles = {
+        {
+          id = 286,
+          animation = {
+            {
+              tileid = 286,
+              duration = 200
+            },
+            {
+              tileid = 287,
+              duration = 200
+            },
+            {
+              tileid = 288,
+              duration = 200
+            },
+            {
+              tileid = 289,
+              duration = 200
+            }
+          }
+        },
+        {
+          id = 287,
+          animation = {
+            {
+              tileid = 287,
+              duration = 200
+            },
+            {
+              tileid = 288,
+              duration = 200
+            },
+            {
+              tileid = 289,
+              duration = 200
+            },
+            {
+              tileid = 286,
+              duration = 200
+            }
+          }
+        },
+        {
+          id = 288,
+          animation = {
+            {
+              tileid = 288,
+              duration = 200
+            },
+            {
+              tileid = 289,
+              duration = 200
+            },
+            {
+              tileid = 286,
+              duration = 200
+            },
+            {
+              tileid = 287,
+              duration = 200
+            }
+          }
+        },
+        {
+          id = 289,
+          animation = {
+            {
+              tileid = 289,
+              duration = 200
+            },
+            {
+              tileid = 286,
+              duration = 200
+            },
+            {
+              tileid = 287,
+              duration = 200
+            },
+            {
+              tileid = 288,
+              duration = 200
+            }
+          }
+        },
+        {
+          id = 290,
+          animation = {
+            {
+              tileid = 290,
+              duration = 200
+            },
+            {
+              tileid = 291,
+              duration = 200
+            },
+            {
+              tileid = 292,
+              duration = 200
+            },
+            {
+              tileid = 293,
+              duration = 200
+            }
+          }
+        },
+        {
+          id = 291,
+          animation = {
+            {
+              tileid = 291,
+              duration = 200
+            },
+            {
+              tileid = 292,
+              duration = 200
+            },
+            {
+              tileid = 293,
+              duration = 200
+            },
+            {
+              tileid = 290,
+              duration = 200
+            }
+          }
+        },
+        {
+          id = 292,
+          animation = {
+            {
+              tileid = 292,
+              duration = 200
+            },
+            {
+              tileid = 293,
+              duration = 200
+            },
+            {
+              tileid = 290,
+              duration = 200
+            },
+            {
+              tileid = 291,
+              duration = 200
+            }
+          }
+        },
+        {
+          id = 293,
+          animation = {
+            {
+              tileid = 293,
+              duration = 200
+            },
+            {
+              tileid = 290,
+              duration = 200
+            },
+            {
+              tileid = 291,
+              duration = 200
+            },
+            {
+              tileid = 292,
+              duration = 200
+            }
+          }
+        }
+      }
     }
   },
   layers = {
@@ -224,8 +490,8 @@ return {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 218, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 240, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 219, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 241, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -264,6 +530,7 @@ return {
           width = 180,
           height = 40,
           rotation = 0,
+          opacity = 1,
           visible = true,
           properties = {}
         },
@@ -277,6 +544,7 @@ return {
           width = 40,
           height = 120,
           rotation = 0,
+          opacity = 1,
           visible = true,
           properties = {}
         },
@@ -290,6 +558,7 @@ return {
           width = 200,
           height = 120,
           rotation = 0,
+          opacity = 1,
           visible = true,
           properties = {}
         },
@@ -303,6 +572,7 @@ return {
           width = 40,
           height = 120,
           rotation = 0,
+          opacity = 1,
           visible = true,
           properties = {}
         },
@@ -316,6 +586,7 @@ return {
           width = 40,
           height = 200,
           rotation = 0,
+          opacity = 1,
           visible = true,
           properties = {}
         },
@@ -329,6 +600,7 @@ return {
           width = 0,
           height = 0,
           rotation = 0,
+          opacity = 1,
           visible = true,
           polygon = {
             { x = 0, y = 0 },
@@ -347,6 +619,7 @@ return {
           width = 0,
           height = 0,
           rotation = 0,
+          opacity = 1,
           visible = true,
           polygon = {
             { x = 0, y = 0 },
@@ -365,6 +638,7 @@ return {
           width = 0,
           height = 0,
           rotation = 0,
+          opacity = 1,
           visible = true,
           polygon = {
             { x = 0, y = 0 },
@@ -383,6 +657,7 @@ return {
           width = 0,
           height = 0,
           rotation = 0,
+          opacity = 1,
           visible = true,
           polygon = {
             { x = 0, y = 0 },
@@ -401,6 +676,7 @@ return {
           width = 0,
           height = 40,
           rotation = 0,
+          opacity = 1,
           visible = true,
           properties = {}
         },
@@ -414,6 +690,7 @@ return {
           width = 0,
           height = 40,
           rotation = 0,
+          opacity = 1,
           visible = true,
           properties = {}
         },
@@ -427,6 +704,7 @@ return {
           width = 0,
           height = 0,
           rotation = 0,
+          opacity = 1,
           visible = true,
           polygon = {
             { x = 0, y = 0 },
@@ -445,6 +723,7 @@ return {
           width = 0,
           height = 0,
           rotation = 0,
+          opacity = 1,
           visible = true,
           polygon = {
             { x = 0, y = 0 },
@@ -463,6 +742,7 @@ return {
           width = 200,
           height = 200,
           rotation = 0,
+          opacity = 1,
           visible = true,
           properties = {}
         },
@@ -476,6 +756,7 @@ return {
           width = 160,
           height = 40,
           rotation = 0,
+          opacity = 1,
           visible = true,
           properties = {}
         },
@@ -489,6 +770,7 @@ return {
           width = 400,
           height = 80,
           rotation = 0,
+          opacity = 1,
           visible = true,
           properties = {}
         },
@@ -502,6 +784,7 @@ return {
           width = 400,
           height = 80,
           rotation = 0,
+          opacity = 1,
           visible = true,
           properties = {}
         },
@@ -515,6 +798,7 @@ return {
           width = 160,
           height = 240,
           rotation = 0,
+          opacity = 1,
           visible = true,
           properties = {}
         },
@@ -528,6 +812,7 @@ return {
           width = 200,
           height = 320,
           rotation = 0,
+          opacity = 1,
           visible = true,
           properties = {}
         },
@@ -541,6 +826,7 @@ return {
           width = 200,
           height = 40,
           rotation = 0,
+          opacity = 1,
           visible = true,
           properties = {}
         },
@@ -554,6 +840,7 @@ return {
           width = 200,
           height = 40,
           rotation = 0,
+          opacity = 1,
           visible = true,
           properties = {}
         },
@@ -567,6 +854,7 @@ return {
           width = 200,
           height = 320,
           rotation = 0,
+          opacity = 1,
           visible = true,
           properties = {}
         },
@@ -580,6 +868,7 @@ return {
           width = 180,
           height = 40,
           rotation = 0,
+          opacity = 1,
           visible = true,
           properties = {}
         },
@@ -593,6 +882,7 @@ return {
           width = 0,
           height = 0,
           rotation = 0,
+          opacity = 1,
           visible = true,
           polygon = {
             { x = 0, y = 0 },
@@ -628,6 +918,7 @@ return {
           width = 0,
           height = 0,
           rotation = 0,
+          opacity = 1,
           visible = true,
           properties = {
             ["bean_col"] = "#ff7629ff",
@@ -662,6 +953,7 @@ return {
           width = 120,
           height = 40,
           rotation = 0,
+          opacity = 1,
           visible = true,
           properties = {}
         }
@@ -691,6 +983,7 @@ return {
           width = 120,
           height = 40,
           rotation = 0,
+          opacity = 1,
           visible = true,
           properties = {
             ["map"] = "floor1/main_south",
@@ -707,6 +1000,7 @@ return {
           width = 40,
           height = 80,
           rotation = 0,
+          opacity = 1,
           visible = true,
           properties = {
             ["cutscene"] = "hub.transition",
@@ -723,6 +1017,7 @@ return {
           width = 40,
           height = 80,
           rotation = 0,
+          opacity = 1,
           visible = true,
           properties = {
             ["map"] = "floor1/marketplace",
@@ -739,6 +1034,7 @@ return {
           width = 40,
           height = 80,
           rotation = 0,
+          opacity = 1,
           visible = true,
           properties = {
             ["map"] = "floor1/tutorialmasters",
@@ -755,6 +1051,7 @@ return {
           width = 40,
           height = 80,
           rotation = 0,
+          opacity = 1,
           visible = true,
           properties = {
             ["map"] = "floor1/pregreatdoor",
@@ -771,6 +1068,7 @@ return {
           width = 40,
           height = 40,
           rotation = 0,
+          opacity = 1,
           visible = true,
           properties = {
             ["cutscene"] = "hub.wall",
@@ -787,6 +1085,7 @@ return {
           width = 40,
           height = 40,
           rotation = 0,
+          opacity = 1,
           visible = true,
           properties = {}
         },
@@ -800,6 +1099,7 @@ return {
           width = 80,
           height = 40,
           rotation = 0,
+          opacity = 1,
           visible = true,
           properties = {
             ["text1"] = "* (A room between...)",
@@ -816,11 +1116,29 @@ return {
           width = 0,
           height = 0,
           rotation = 0,
+          opacity = 1,
           visible = true,
           properties = {
             ["actor"] = "wall",
             ["cutscene"] = "hub.wall_guardian",
             ["flagcheck"] = "wall_hit"
+          }
+        },
+        {
+          id = 98,
+          name = "npc",
+          type = "",
+          shape = "point",
+          x = 550,
+          y = 540,
+          width = 0,
+          height = 0,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {
+            ["actor"] = "len",
+            ["cutscene"] = "hub.len"
           }
         },
         {
@@ -833,6 +1151,7 @@ return {
           width = 0,
           height = 0,
           rotation = 0,
+          opacity = 1,
           visible = true,
           properties = {
             ["actor"] = "sans",
@@ -850,6 +1169,7 @@ return {
           width = 40,
           height = 40,
           rotation = 0,
+          opacity = 1,
           visible = true,
           properties = {
             ["cutscene"] = "hub.warp_bin_note"
@@ -865,6 +1185,7 @@ return {
           width = 120,
           height = 40,
           rotation = 0,
+          opacity = 1,
           visible = true,
           properties = {
             ["skin"] = "main_hub"
@@ -880,6 +1201,7 @@ return {
           width = 80,
           height = 40,
           rotation = 0,
+          opacity = 1,
           visible = true,
           properties = {
             ["map"] = "hub_elevator",
@@ -896,6 +1218,7 @@ return {
           width = 72,
           height = 104,
           rotation = 0,
+          opacity = 1,
           gid = 210,
           visible = true,
           properties = {
@@ -912,6 +1235,7 @@ return {
           width = 72,
           height = 20,
           rotation = 0,
+          opacity = 1,
           visible = true,
           properties = {
             ["cond"] = "not Noel:loadNoel() and Game:getFlag(\"FUN\") == 99",
@@ -929,6 +1253,7 @@ return {
           width = 120,
           height = 92,
           rotation = 0,
+          opacity = 1,
           visible = true,
           properties = {
             ["cond"] = "os.date(\"*t\").month == 12 and os.date(\"*t\").day == 31"
@@ -944,6 +1269,7 @@ return {
           width = 0,
           height = 0,
           rotation = 0,
+          opacity = 1,
           visible = true,
           properties = {}
         },
@@ -957,6 +1283,7 @@ return {
           width = 40,
           height = 80,
           rotation = 0,
+          opacity = 1,
           visible = true,
           properties = {
             ["facing"] = "right",
@@ -974,6 +1301,7 @@ return {
           width = 0,
           height = 0,
           rotation = 0,
+          opacity = 1,
           visible = true,
           properties = {}
         },
@@ -987,6 +1315,7 @@ return {
           width = 520,
           height = 40,
           rotation = 0,
+          opacity = 1,
           visible = true,
           properties = {
             ["cond"] = "Game:getFlag(\"FUN\", 0) > 40 and Game:getFlag(\"FUN\", 0) < 50 and Game:getFlag(\"hasPushedSans\")",
@@ -1004,6 +1333,7 @@ return {
           width = 40,
           height = 80,
           rotation = 0,
+          opacity = 1,
           visible = true,
           properties = {
             ["cutscene"] = "hub.transitionS",
@@ -1036,6 +1366,7 @@ return {
           width = 0,
           height = 0,
           rotation = 0,
+          opacity = 1,
           visible = true,
           properties = {}
         },
@@ -1049,6 +1380,7 @@ return {
           width = 0,
           height = 0,
           rotation = 0,
+          opacity = 1,
           visible = true,
           properties = {}
         },
@@ -1062,6 +1394,7 @@ return {
           width = 0,
           height = 0,
           rotation = 0,
+          opacity = 1,
           visible = true,
           properties = {}
         },
@@ -1075,6 +1408,7 @@ return {
           width = 0,
           height = 0,
           rotation = 0,
+          opacity = 1,
           visible = true,
           properties = {}
         },
@@ -1088,6 +1422,7 @@ return {
           width = 0,
           height = 0,
           rotation = 0,
+          opacity = 1,
           visible = true,
           properties = {}
         },
@@ -1101,6 +1436,7 @@ return {
           width = 0,
           height = 0,
           rotation = 0,
+          opacity = 1,
           visible = true,
           properties = {}
         },
@@ -1114,6 +1450,7 @@ return {
           width = 0,
           height = 0,
           rotation = 0,
+          opacity = 1,
           visible = true,
           properties = {}
         },
@@ -1127,6 +1464,7 @@ return {
           width = 0,
           height = 0,
           rotation = 0,
+          opacity = 1,
           visible = true,
           properties = {}
         },
@@ -1140,6 +1478,7 @@ return {
           width = 0,
           height = 0,
           rotation = 0,
+          opacity = 1,
           visible = true,
           properties = {}
         },
@@ -1153,6 +1492,7 @@ return {
           width = 0,
           height = 0,
           rotation = 0,
+          opacity = 1,
           visible = true,
           properties = {}
         },
@@ -1166,6 +1506,7 @@ return {
           width = 0,
           height = 0,
           rotation = 0,
+          opacity = 1,
           visible = true,
           properties = {}
         }

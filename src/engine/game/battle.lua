@@ -218,6 +218,7 @@ function Battle:init()
     self.on_finish_action = nil
 
     self.defending_begin_timer = 0
+    self.defending_end_timer = 0
 end
 
 function Battle:createPartyBattlers()
@@ -291,6 +292,20 @@ function Battle:createPartyBattlers()
 
 end
 
+function Battle:createBattleUI()
+    return self:addChild(BattleUI())
+end
+
+function Battle:createTensionBar()
+    return self:addChild(TensionBar(-25, 40, true))
+end
+
+function Battle:createUI()
+    self.background = self.encounter:createBackground()
+    self.battle_ui = self:createBattleUI()
+    self.tension_bar = self:createTensionBar()
+end
+
 ---@param state string
 ---@param encounter string|Encounter
 function Battle:postInit(state, encounter)
@@ -301,8 +316,6 @@ function Battle:postInit(state, encounter)
     else
         self.encounter = encounter
     end
-
-    self.background = self.encounter:createBackground()
 
     if Game.world.music:isPlaying() and self.encounter.music then
         self.resume_world_music = true
@@ -322,11 +335,7 @@ function Battle:postInit(state, encounter)
         end
     end
 
-    self.battle_ui = BattleUI()
-    self:addChild(self.battle_ui)
-
-    self.tension_bar = TensionBar(-25, 40, true)
-    self:addChild(self.tension_bar)
+    self:createUI()
 
     self.battler_targets = {}
     for index, battler in ipairs(self.party) do
@@ -449,7 +458,7 @@ function Battle:getState()
 end
 
 --- Returns the current substate of the battle.
----@return BattleSubState
+---@return string
 function Battle:getSubState()
     return self.substate
 end
@@ -509,20 +518,9 @@ function Battle:checkEndWaves(old, new, reason)
                 should_end = false
             end
         end
-        if should_end then
-            self:returnSoul()
-            if self.arena then
-                self.arena:remove()
-                self.arena = nil
-            end
-            for _, battler in ipairs(self.party) do
-                battler.targeted = false
-            end
+        if should_end and old == "DEFENDING" and new ~= "DEFENDINGBEGIN" then
+            self:internalEndWaves()
         end
-    end
-
-    if old == "DEFENDING" and new ~= "DEFENDINGBEGIN" and should_end then
-        self:endWaves()
     end
 end
 
@@ -786,7 +784,7 @@ function Battle:onVictory()
         self.tension_bar:hide()
     end
 
-    self:endWaves()
+    self:internalEndWaves()
 
     for _, battler in ipairs(self.party) do
         battler:setSleeping(false)
@@ -1155,6 +1153,7 @@ end
 function Battle:onDefendingEndState()
     self:undarken()
     self:hideTargets()
+    self.defending_end_timer = 0
 end
 
 --- Called when the [`BattleState`](lua://BattleState) is changed to BATTLETEXT.
@@ -1214,8 +1213,30 @@ function Battle:onStateChange(old, new, reason)
 end
 
 --- Forcibly end the wave.
+---
 --- This should not be called in place of normal wave ending via time or enemy defeat.
+---
+--- This ends up entering the DEFENDINGEND state.
 function Battle:endWaves()
+    self:setState("DEFENDINGEND")
+end
+
+--- Responsible for actually ending the waves.
+---
+--- This removes the arena, returns the soul, ends all of the waves, and moves to the next turn if specified.
+---
+--- This should NOT be called by user code; instead, use [`Battle:endWaves()`](lua://Battle.endWaves) to end the waves if an immediate end is needed.
+---@private
+function Battle:internalEndWaves()
+    self:returnSoul()
+    if self.arena then
+        self.arena:remove()
+        self.arena = nil
+    end
+    for _, battler in ipairs(self.party) do
+        battler.targeted = false
+    end
+
     for _, wave in ipairs(self.waves) do
         if not wave:onEnd(false) then
             wave:clear()
@@ -1223,32 +1244,14 @@ function Battle:endWaves()
         end
     end
 
-    local function exitWaves()
+    self.encounter:onWavesDone()
+
+    self.timer:after(15 / 30, function()
         for _, wave in ipairs(self.waves) do
             wave:onArenaExit()
         end
         self.waves = {}
-    end
-
-    local ending_wave = self.state_reason == "WAVEENDED"
-
-    if self:hasCutscene() then
-        self.cutscene:after(function()
-            exitWaves()
-            if ending_wave then
-                self:nextTurn()
-            end
-        end)
-    else
-        self.timer:after(15 / 30, function()
-            exitWaves()
-            if ending_wave then
-                self:nextTurn()
-            end
-        end)
-    end
-
-    self.encounter:onWavesDone()
+    end)
 end
 
 --- Gets the location the soul should spawn at when waves start by default
@@ -2010,7 +2013,7 @@ end
 ---@param spell     string|Spell        The name of the spell that should be casted by `user`
 ---@param battler   Battler             The battler that initiates the ACT
 ---@param user      string              The id of the battler that should cast the spell
----@param target?   Battler[]|Battler   An optional list of battlers that 
+---@param target?   Battler[]|Battler   An optional list of battlers that
 function Battle:powerAct(spell, battler, user, target)
 
     local user_battler = self:getPartyBattler(user)
@@ -3005,7 +3008,7 @@ end
 ---@overload fun(self: Battle, id: string, ...)
 ---@overload fun(self: World, func: BattleCutsceneFunc, ...)
 ---@param group string  The name of the group the cutscene is a part of
----@param id    string  The id of the cutscene 
+---@param id    string  The id of the cutscene
 ---@param ...   any     Additional arguments that will be passed to the cutscene function
 ---@return BattleCutscene?
 function Battle:startCutscene(group, id, ...)
@@ -3028,7 +3031,7 @@ end
 --- Starts a cutscene in battle where the cutscene receives the the currently ACTing character and the ACT's target as additional arguments \
 ---@overload fun(self: Battle, id: string, dont_finish?: boolean)
 ---@param group         string  The name of the group the cutscene is a part of
----@param id            string  The id of the cutscene 
+---@param id            string  The id of the cutscene
 ---@param dont_finish?  boolean Whether the action should end when the cutscene finishes (defaults to `false`)
 ---@return Cutscene?
 function Battle:startActCutscene(group, id, dont_finish)
@@ -3111,6 +3114,8 @@ function Battle:update()
         self:updateDefendingBegin()
     elseif self.state == "DEFENDING" then
         self:updateWaves()
+    elseif self.state == "DEFENDINGEND" then
+        self:updateDefendingEnd()
     elseif self.state == "ENEMYDIALOGUE" then
         self:updateEnemyDialogue()
     elseif self.state == "SHORTACTTEXT" then
@@ -3400,6 +3405,13 @@ function Battle:updateWaves()
     end
 end
 
+function Battle:updateDefendingEnd()
+    if self.defending_end_timer >= 15 then
+        self:nextTurn()
+    end
+    self.defending_end_timer = self.defending_end_timer + DTMULT
+end
+
 function Battle:updateShortActText()
     if Input.pressed("confirm") or Input.down("menu") then
         if (not self.battle_ui.short_act_text_1:isTyping()) and
@@ -3449,6 +3461,7 @@ function Battle:drawDebug()
     self:debugPrintOutline("CTRL+B - kill party", 4, 144)
     self:debugPrintOutline("CTRL+K - fill tension", 4, 160)
     self:debugPrintOutline("CTRL+N - toggle noclip", 4, 176)
+    self:debugPrintOutline("CTRL+I - toggle invincibility", 4, 192)
 end
 
 function Battle:draw()
@@ -3708,9 +3721,27 @@ function Battle:onKeyPressed(key)
         end
         if key == "k" then
             Game:setTension(Game:getMaxTension())
+            Assets.playSound("cardrive")
+
+            if self.tension_bar ~= nil then
+                self.tension_bar:flash()
+            end
         end
         if key == "n" then
             NOCLIP = not NOCLIP
+            if NOCLIP then
+                Assets.playSound("petrify")
+            else
+                Assets.playSound("bump")
+            end
+        end
+        if key == "i" then
+            INVINCIBILITY = not INVINCIBILITY
+            if INVINCIBILITY then
+                Assets.playSound("sparkle_glock")
+            else
+                Assets.playSound("bump")
+            end
         end
     end
 
@@ -3995,7 +4026,7 @@ end
 
 --- Checks if the current encounter has reduced tension.
 --- By default, this redirects to Encounter
---- @return boolean reduced Whether the encounter has reduced tension.
+---@return boolean reduced Whether the encounter has reduced tension.
 function Battle:hasReducedTension()
     return self.encounter:hasReducedTension()
 end

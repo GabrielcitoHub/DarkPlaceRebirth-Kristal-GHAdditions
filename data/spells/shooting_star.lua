@@ -76,6 +76,9 @@ function spell:onCast(user, target)
         -- yes it's just the iceshock formula, I'm not a mathemetician
         local min_magic = MathUtils.clamp(user.chara:getStat("magic") - 10, 1, 999)
         local damage = math.ceil(((min_magic * 30) + 90 + MathUtils.random(10))/target:getResistance("HOLY"))
+        if (Game.battle and Game.battle.headwind > 0) then
+            damage = math.floor(damage * 1.25)
+        end
         particles:remove()
         target:flash()
         target:hurt(damage, user)

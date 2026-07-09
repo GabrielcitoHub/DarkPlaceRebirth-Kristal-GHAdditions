@@ -114,7 +114,7 @@ function Game:enter(previous_state, save_id, save_name, fade)
         save_name = nil
         self:load(save, save_id, fade)
     elseif save_id then
-        Kristal.loadGame(save_id, fade)
+        if not Kristal.loadGame(save_id, fade) then return end
     else
         self:load(nil, nil, fade)
     end
@@ -238,6 +238,45 @@ function Game:registerBuiltInEvents()
         sprite:play(data.properties["speed"], true)
         sprite:setScale(data.properties["scalex"] or 2, data.properties["scaley"] or 2)
         return sprite
+    end)
+
+    registry:register("climbentry", function(data)
+        return ClimbEntry(data.x, data.y, getRectData(data), {
+            target = data.properties.target,
+            solid = data.properties.solid
+        })
+    end)
+
+    registry:register("climbexit", function(data)
+        return ClimbExit(data.x, data.y, getRectData(data), {
+            target = data.properties.target,
+            direction = data.properties.direction,
+            can_exit = data.properties.can_exit
+        })
+    end)
+
+    registry:register("climblanding", function(data) return ClimbLanding(data.x, data.y, getRectData(data)) end)
+    registry:register("climbarea", function(data) return ClimbArea(data.x, data.y, getRectData(data)) end)
+
+    registry:register("fallingclimbarea", function(data)
+        return FallingClimbArea(data.x, data.y, getRectData(data), {
+            dont_break = data.properties.dont_break,
+            breaks_on_leave = data.properties.breaks_on_leave,
+            fall_time = data.properties.fall_time,
+            timed = data.properties.timed,
+            no_unsafe_area = data.properties.no_unsafe_area
+        })
+    end)
+
+    registry:register("climbunsafe", function(data) return ClimbUnsafe(data.x, data.y, getRectData(data)) end)
+
+    registry:register("climbmover", function(data)
+        return ClimbMover(data.x, data.y, getRectData(data), {
+            target = data.properties.target,
+            exit = data.properties.exit,
+            start_exit = data.properties.start_exit,
+            one_way = data.properties.one_way
+        })
     end)
 end
 
@@ -900,6 +939,12 @@ function Game:loadQuick(fade)
     self.quick_save = save
 end
 
+--- Creates the battle instance. You most likely do not need to call this directly.
+---@return Battle
+function Game:createBattle()
+    return Battle()
+end
+
 --- Starts a battle using the specified encounter file.
 ---@param encounter     Encounter|string    The encounter id or instance to use for this battle.
 ---@param transition?   boolean|string      Whether to start in the transition state (Defaults to `true`). As a string, represents the state to start the battle in.
@@ -920,7 +965,7 @@ function Game:encounter(encounter, transition, enemy, context)
 
     self.state = "BATTLE"
 
-    self.battle = Battle()
+    self.battle = self:createBattle()
 
     if context then
         self.battle.encounter_context = context
@@ -1090,7 +1135,7 @@ end
 ---@return Recruit[]
 function Game:getRecruits(include_incomplete, include_hidden)
     local recruits = {}
-    for id,recruit in pairs(Game.recruits_data) do
+    for id, recruit in pairs(Game.recruits_data) do
         if (not recruit:getHidden() or include_hidden) and (recruit:getRecruited() == true or include_incomplete and type(recruit:getRecruited()) == "number" and recruit:getRecruited() > 0) then
             table.insert(recruits, recruit)
         end
@@ -1102,7 +1147,7 @@ end
 ---@param recruit string
 ---@return boolean
 function Game:hasRecruit(recruit)
-    return self:getRecruit(recruit):getRecruited() == true
+    return self:getRecruit(recruit) and self:getRecruit(recruit):getRecruited() == true
 end
 
 ---@param chara     string|PartyMember
@@ -1443,10 +1488,6 @@ function Game:onKeyPressed(key, is_repeat)
     elseif self.state == "OVERWORLD" then
         if self.world then
             self.world:onKeyPressed(key)
-        end
-    elseif self.state == "SHOP" then
-        if self.shop then
-            self.shop:onKeyPressed(key, is_repeat)
         end
     elseif self.state == "GAMEOVER" then
         if self.gameover then

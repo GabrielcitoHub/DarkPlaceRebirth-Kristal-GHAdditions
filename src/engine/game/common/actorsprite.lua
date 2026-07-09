@@ -1,6 +1,6 @@
 --- An extension of `Sprite` that can integrate with an actor.
 --- If an object defines an Actor, it will use this over `Sprite` for its sprite.
---- 
+---
 ---@class ActorSprite : Sprite
 ---
 ---@field actor               Actor                               *(Read-only)* The actor associated with this sprite
@@ -12,7 +12,7 @@
 ---@field sprite_options      table                               *(Read-only)*
 ---
 ---@field temp_anim           table|string|function?              *(Read-only)* The animation that will be set when the current temporary animation stops
----@field temp_sprite         string?                             *(Read-only)* The sprite that will be set when the current temporary animation stops 
+---@field temp_sprite         string?                             *(Read-only)* The sprite that will be set when the current temporary animation stops
 ---
 ---@field directional         boolean?                            *(Read-only)* Whether the current sprite changes based on the facing direction
 ---@field dir_sep             string?                             *(Read-only)* The separator the current sprite uses for its directional sprites. Either `"_"` or `"/"`
@@ -77,6 +77,9 @@ function ActorSprite:init(actor)
 
     self.frozen = false
     self.freeze_progress = 1
+
+    self.darkened = false
+    self.darkened_progress = 1
 
     self.on_footstep = nil
 
@@ -437,7 +440,7 @@ function ActorSprite:update()
             local should_do_walk_animation = false
 
             if self.walking then
-                -- If we're holding a movement key, or this actor is walking 
+                -- If we're holding a movement key, or this actor is walking
                 -- for any reason, we want to do the walk animation.
                 should_do_walk_animation = true
             elseif self.frames then
@@ -605,6 +608,40 @@ function ActorSprite:draw()
         love.graphics.setBlendMode("alpha")
 
         if self.freeze_progress < 1 then
+            Draw.popScissor()
+        end
+    end
+
+    if self.texture and self.darkened then
+        if self.darkened_progress < 1 then
+            Draw.pushScissor()
+            Draw.scissorPoints(nil, self.texture:getHeight() * (1 - self.darkened_progress), nil, nil)
+        end
+
+        local last_shader = love.graphics.getShader()
+        local shader = Kristal.Shaders["AddColor"]
+        love.graphics.setShader(shader)
+        shader:send("inputcolor", { 0.1, 0.1, 0.2 })
+        shader:send("amount", 1)
+
+        local r, g, b, a = self:getDrawColor()
+
+        Draw.setColor(0, 0, 1, a * 0.8)
+        Draw.draw(self.texture, -1, -1)
+        Draw.setColor(0, 0, 1, a * 0.4)
+        Draw.draw(self.texture, 1, -1)
+        Draw.draw(self.texture, -1, 1)
+        Draw.setColor(0, 0, 1, a * 0.8)
+        Draw.draw(self.texture, 1, 1)
+
+        love.graphics.setShader(last_shader)
+
+        love.graphics.setBlendMode("add")
+        Draw.setColor(0.1, 0.1, 0.2, a * 0.4)
+        Draw.draw(self.texture)
+        love.graphics.setBlendMode("alpha")
+
+        if self.darkened_progress < 1 then
             Draw.popScissor()
         end
     end

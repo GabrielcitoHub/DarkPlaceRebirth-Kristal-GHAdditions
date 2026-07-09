@@ -5,12 +5,23 @@ local function deliver(cutscene)
 	cutscene:wait(1)
 	local success, result_text = Game.inventory:tryGiveItem("fluffy_bandana")
 	if success then
-		Game:setFlag("ken_quest_gaveBandana", 1)
-		Game:getQuest("delivering_a_bandana"):unlock()
-		Assets.playSound("item")
-		cutscene:text(result_text)
-		cutscene:text("* There!")
-		cutscene:text("* Come back once you deliver it and i might give you a tip")
+		local success2, result_text2 = Game.inventory:tryGiveItem("pedestal_rough_map")
+		cutscene:text(result_text2)
+		if not success2 then
+			Game.inventory:removeItem("fluffy_bandana")
+			cutscene:text("* ...")
+			Assets.playSound("bluh")
+			cutscene:wait(1)
+			cutscene:text("* You need more [color:yellow]KEYs[color:reset] inventory space...")
+			cutscene:text("* It's okay tho,[wait:5] you can still come back later")
+		else
+			Game:setFlag("ken_quest_gaveBandana", 1)
+			Game:getQuest("delivering_a_bandana"):unlock()
+			Assets.playSound("item")
+			cutscene:text(result_text)
+			cutscene:text("* There!")
+			cutscene:text("* Come back once you deliver it and i might give you a tip")
+		end
 	else
 		cutscene:text(result_text)
 		cutscene:text("* ...")
@@ -62,6 +73,119 @@ return {
 		end
 	end,
 
+	---@param cutscene WorldCutscene
+	papereater = function(cutscene, event)
+		local paper = cutscene:getCharacter('papereater')
+		cutscene:text("* Hey there buddy! Its me paper eater!")
+		cutscene:text("* Want me to eat your paper? (I also find bandannas quite SCRUMPTIOUS)")
+		local choice = cutscene:choicer({"Yes", "No"})
+		if choice == 1 then
+			local len = cutscene:getCharacter("len")
+			local hadBandana = false
+			if len and Game:getFlag("len_protects_bandana_from_paper_monster") and Game.inventory:hasItem("fluffy_bandana") and Game.inventory:hasItem("paper_hat") then
+				Game.inventory:removeItem("fluffy_bandana")
+				Assets.playSound("item", 1, 0.7)
+				cutscene:text("* (Len took your [color:yellow]FluffyBandana[color:reset] so it doesn't get eaten.)")
+				hadBandana = true
+			end
+
+			paper:setAnimation("open")
+			cutscene:wait(1)
+			if Game.inventory:hasItem("paper_hat") then
+				paper:setAnimation("eat",false)
+				Game.inventory:removeItem("paper_hat")
+				cutscene:text("* I have eaten your paper!")
+			else
+				cutscene:text("* YOU HAVE NO PAPER. FOOL.")
+				paper:resetSprite()
+				return
+			end
+
+			if Game.inventory:hasItem("fluffy_bandana") then
+				paper:setAnimation("bandana",false)
+				Game.inventory:removeItem("fluffy_bandana")
+				if not len then
+					cutscene:text("* I have eaten your bandana!")
+				else
+					Game:setFlag("len_protects_bandana_from_paper_monster", true)
+					cutscene:text("* I have eaten you-", {wait = false, auto = true})
+					cutscene:wait(0.4)
+					len:alert()
+					cutscene:wait(0.6)
+					cutscene:wait(cutscene:walkTo(len, paper.x, paper.y + 50, 0.3))
+					paper:setAnimation("bandana_struggle",false)
+					len:setAnimation("reach")
+					local timer = Game.world.timer
+					local shakyTimer = timer:every(0.8, function()
+						len:shake()
+						paper:shake(0.4)
+						Assets.playSound("wing")
+					end)
+					
+					cutscene:textTagged("* No![wait:5] give it back![wait:5] give it back!!!", "dumb", "len")
+					timer:cancel(shakyTimer)
+					paper:setAnimation("open")
+					local bandana = Game.inventory:addItem("fluffy_bandana")
+					Assets.playSound("item")
+					paper:resetSprite()
+					len:resetSprite()
+					len:setFacing("up")
+					cutscene:text("* ([color:yellow]" .. bandana:getName() .. "[color:reset] has returned to your [color:yellow]ARMOURs[color:reset].)")
+					len:setFacing("down")
+
+					local resolution = Game:getFlag("ken_quest_resolution")
+					if resolution == 2 then
+						cutscene:textTagged("* ...[wait:8] actually...[wait:5] i think i'll keep this.", "neutral_closed", "len")
+						cutscene:textTagged("* W-Why?[wait:5] to keep it safe, obviously...", "nervous", "len")
+
+						local lenParty = Game:getPartyMember("len")
+						local equipped = lenParty.equipped
+						if equipped then
+							local armors = equipped.armor
+							if armors then
+								local has_space = #armors < 2
+								if has_space then
+									local bandana = Game.inventory:removeItem("fluffy_bandana")
+									table.insert(armors, bandana)
+									Game:setFlag("ken_quest_gaveBandana", false)
+									Assets.playSound("item", 1, 0.7)
+									cutscene:text("* ([color:yellow]" .. bandana:getName() .. "[color:reset] has returned to Len [color:yellow]ARMOURs[color:reset].)")
+								else
+									Assets.playSound("bump")
+									cutscene:text("* (Len tried to return [color:yellow]FluffyBandana[color:reset] to their [color:yellow]ARMOURs[color:reset].)")
+									cutscene:text("* (...[wait:5]but their [color:yellow]ARMOURs[color:reset] inventory was full.)")
+									cutscene:textTagged("* ...[wait:5]Okay,[wait:5] i guess you can have it then...", "nervous", "len")
+									Assets.playSound("item")
+									cutscene:text("* ([color:yellow]" .. bandana:getName() .. "[color:reset] has returned to your [color:yellow]ARMOURs[color:reset]...[wait:5] again.)")
+								end
+							end
+						end
+
+						Game:setFlag("ken_quest_resolution", 3)
+					else
+						cutscene:textTagged("* Close one...", "nervous", "len")
+					end
+					
+					cutscene:wait(cutscene:attachFollowers())
+					return
+				end
+			end
+
+			if len and Game:getFlag("len_protects_bandana_from_paper_monster") and hadBandana then
+				local bandana = Game.inventory:addItem("fluffy_bandana")
+				Assets.playSound("item")
+				cutscene:text("* ([color:yellow]" .. bandana:getName() .. "[color:reset] has returned to your [color:yellow]ARMOURs[color:reset].)")
+			end
+
+			paper:setAnimation("close")
+			cutscene:wait(0.4)
+			paper:setAnimation(nil)
+		end
+		if choice == 2 then
+		cutscene:text("* you starve me.")
+		end
+	end,
+
 	ddelta = function(cutscene, event)
 		cutscene:text("* It's a door.")
 		cutscene:text("* The sign reads \"This\napartment belongs to Diamond Deltahedron.\"")
@@ -81,6 +205,7 @@ return {
                     cutscene:showNametag("Jamm")
 					cutscene:text("* Beats me.[wait:10]\n* I asked the same thing too.", "neutral", "jamm")
 					cutscene:text("* I was surprised Marcy's name was on it.[wait:10]\n* She's just a kid.", "nervous_left", "jamm")
+                    cutscene:showNametag("Brenda")
                 end
 				cutscene:text("* Eh whatever,[wait:5] don't look a Giftrot in the mouth as they say.", "suspicious", "brenda")
 				cutscene:hideNametag()
@@ -112,12 +237,20 @@ return {
 	end,
 
 	ken = function(cutscene, event)
+		Assets.playSound("knock")
+		cutscene:wait(1)
+
+		if Game:hasPartyMember("len") or (Game:getFlag("movedKen") or Game:getFlag("lostKen")) then -- Don't question this, please
+			cutscene:text("* (No response...)")
+			return
+		end
+
 		cutscene:text("* Oh someowsne at the door...")
 		cutscene:text("* Wait are you that delivery guy i contacted?...")
 		local choice = cutscene:choicer({"Yes", "No"})
 		if choice == 1 then
 			local resolution = Game:getFlag("ken_quest_resolution")
-			if resolution then
+			if resolution and resolution > 0 and resolution ~= 3 then
 				Assets.playSound("bluh")
 				cutscene:wait(1)
 			end
@@ -145,6 +278,33 @@ return {
 					cutscene:text(result_text)
 					cutscene:text("* Oh...")
 				end
+				return
+			elseif resolution == 3 then
+				local kenTalk = Game:getFlag("ken_rob_caught")
+				if kenTalk then
+					cutscene:text("* Please leave.")
+					return
+				end
+
+				Game:setFlag("ken_rob_caught", true)
+				cutscene:text("* So,[wait:5] A bird told me some things...")
+				cutscene:text("* Things about the destiny of my deliver.")
+				cutscene:text("* They said you not only didn't deliver it but you also tried to give it to a paper monster??")
+				cutscene:text("* I trust my friend,[wait:5] and i know they wouln't lie...")
+				cutscene:text("* ...[wait:5]Did you lie to me?")
+
+				local c = cutscene:choicer({"Yes", "No"})
+				if c == 1 then
+					cutscene:text("* Why?[wait:5] was the armour so good you though you could lie to keep it?")
+					cutscene:text("* I don't get it...")
+				else
+					cutscene:text("* I know you're lying...[wait:5] do you just not feel shame at all to lie so blatantly?")
+					cutscene:text("* You must not even be the delivery guy!")
+				end
+
+				cutscene:text("* I don't trust you...[wait:5] not anymore.")
+				cutscene:text("* You don't even deserve my [color:yellow]PaperHats[color:reset],[wait:5] Leave.")
+				cutscene:text("* Please leave.")
 				return
 			end
 			if Game:getFlag("ken_quest_gaveBandana") == 1 then

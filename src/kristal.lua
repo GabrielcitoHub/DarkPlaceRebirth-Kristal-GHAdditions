@@ -52,12 +52,12 @@ else
     -- Hotswaps Noel specifically. Why can't we just use hotswapper? I don't know! Ask SDM!
     function Kristal.reloadnoel()
         -- If you don't know what this is for, then don't touch it!!!
-        
-        package.loaded["src.engine.game.char_file_handlers.noel_spawn"] = nil 
-        Noel = require("src.engine.game.char_file_handlers.noel_spawn")      
+
+        package.loaded["src.engine.game.char_file_handlers.noel_spawn"] = nil
+        Noel = require("src.engine.game.char_file_handlers.noel_spawn")
         if Noel:loadNoel() then
             Kristal.noel = true
-        else 
+        else
             Kristal.noel = false
         end
     end
@@ -86,7 +86,7 @@ function Kristal.fetch(url, options)
     if not options["disable_message"] then
         Kristal.Console:log("Fetching from URL "..url)
     end
-    
+
     Kristal.HTTPS.in_channel:push({
         url = url,
         key = Kristal.HTTPS.next_key,
@@ -147,7 +147,8 @@ function love.load(args)
     love.graphics.setDefaultFilter("nearest", "nearest")
 
     -- set the window size
-    local window_scale = Kristal.Config["windowScale"]
+    local window_scale = Kristal.getWindowScale()
+
     if window_scale ~= 1 or Kristal.Config["fullscreen"] or Kristal.bordersEnabled() then
         Kristal.resetWindow()
     end
@@ -188,6 +189,8 @@ function love.load(args)
     Kristal.ChapterConfigs[2] = JSON.decode(love.filesystem.read("configs/chapter2.json"))
     Kristal.ChapterConfigs[3] = JSON.decode(love.filesystem.read("configs/chapter3.json"))
     Kristal.ChapterConfigs[4] = JSON.decode(love.filesystem.read("configs/chapter4.json"))
+    Kristal.ChapterConfigs[5] = JSON.decode(love.filesystem.read("configs/chapter5.json"))
+
     Kristal.ExtraConfigs = JSON.decode(love.filesystem.read("configs/extra.json"))
 
     -- If a certain save file exists, Dess destroyed reality with her trolley problem
@@ -273,6 +276,13 @@ function love.quit()
     end
     if Kristal.HTTPS.thread and Kristal.HTTPS.thread:isRunning() then
         Kristal.HTTPS.in_channel:push("stop")
+    end
+end
+
+function love.focus()
+    local state = Kristal.getState()
+    if state ~= nil and state.focus then
+        state:focus()
     end
 end
 
@@ -738,7 +748,7 @@ function Kristal.errorHandler(msg, trace_level)
             -- msg = err
         end
     end
-    
+
     Draw.reset()
 
     local copy_color = { 1, 1, 1, 1 }
@@ -1268,6 +1278,7 @@ function Kristal.resetDevMode()
     FAST_FORWARD = false
     DEBUG_RENDER = false
     NOCLIP = false
+    INVINCIBILITY = false
 end
 
 --- Clears all state expected to be changed by projects. \
@@ -1337,7 +1348,7 @@ function Kristal.returnToMenu()
 
     -- Clear the project
     Kristal.clearModState()
-	
+
 	Kristal.loadAssets("", "plugins", "")
 
     -- Quit the game if the menu is disabled
@@ -1369,6 +1380,12 @@ function Kristal.quickReload(mode)
     if Kristal.isLoading() then
         error("Attempt to reload while loading")
     end
+
+    local dev_debug_override = DEBUG_OVERRIDE
+    local dev_fast_forward = FAST_FORWARD
+    local dev_debug_render = DEBUG_RENDER
+    local dev_noclip = NOCLIP
+    local dev_invincibility = INVINCIBILITY
 
     -- Temporarily save game variables
     local save, save_id, encounter, shop, minigame
@@ -1424,10 +1441,31 @@ function Kristal.quickReload(mode)
                         -- Switch to Game
                         Kristal.setState(Game)
                     end
+
+                    if Kristal.isDevMode() then
+                        DEBUG_OVERRIDE = dev_debug_override
+                        FAST_FORWARD = dev_fast_forward
+                        DEBUG_RENDER = dev_debug_render
+                        NOCLIP = dev_noclip
+                        INVINCIBILITY = dev_invincibility
+                    end
                 end
             end)
         else
-            Kristal.loadMod(mod_id, save_id)
+            Kristal.loadMod(mod_id, save_id, nil, function()
+                if Kristal.preInitMod(mod_id) then
+                    Kristal.setDesiredWindowTitleAndIcon()
+                    Kristal.setState("Game", save_id)
+                    Kristal.resetDevMode()
+                    if Kristal.isDevMode() then
+                        DEBUG_OVERRIDE = dev_debug_override
+                        FAST_FORWARD = dev_fast_forward
+                        DEBUG_RENDER = dev_debug_render
+                        NOCLIP = dev_noclip
+                        INVINCIBILITY = dev_invincibility
+                    end
+                end
+            end)
         end
     end)
 end
@@ -1592,7 +1630,15 @@ function Kristal.loadModAssets(id, asset_type, asset_paths, after)
     end
     Assets.getBucket("project"):startLoading(paths4real)
     if Kristal.Config["projectLoadingMode"] == LoadingMode.FULL then
-        Kristal.setState("ProjectLoading", after)
+        local current_state = Kristal.getState()
+        if current_state == Kristal.States["LameFadeout"] then
+            ---@cast current_state LameFadeout
+            current_state:setFinishCallback(function()
+                Kristal.setState("ProjectLoading", after)
+            end)
+        else
+            Kristal.setState("ProjectLoading", after)
+        end
     else
         MOD_LOADING = false
         after()
@@ -1652,16 +1698,23 @@ function Kristal.swapIntoMod(id, use_lame_fadeout, ...)
         save.spawn_position = {x, y}
     end
 
-    Kristal.setState(use_lame_fadeout and "LameFadeout" or {}, use_lame_fadeout)
+    Kristal.setState({})
     Kristal.clearModState()
+    if use_lame_fadeout then
+        Kristal.setState("LameFadeout", use_lame_fadeout)
+    end
 
     Kristal.loadAssets("", "mods", "", function()
         Kristal.loadMod(id, nil, nil, function()
             if Kristal.preInitMod(id) then
                 Kristal.setDesiredWindowTitleAndIcon()
                 local game_params = {save, save_id}
-                if use_lame_fadeout then
-                    Kristal.States["LameFadeout"]:onLoadFinish(game_params)
+                local current_state = Kristal.getState()
+                if current_state == Kristal.States["LameFadeout"] then
+                    ---@cast current_state LameFadeout
+                    current_state:setFinishCallback(function()
+                        Kristal.setState("Game", unpack(game_params))
+                    end)
                 else
                     Kristal.setState("Game", unpack(game_params))
                 end
@@ -1789,20 +1842,24 @@ end
 
 --- Called internally. Resets the window properties to the user config.
 function Kristal.resetWindow()
-    local window_scale  = Kristal.Config["windowScale"]
-    local window_width  = SCREEN_WIDTH * window_scale
+    local window_scale = Kristal.getWindowScale()
+    local window_width = SCREEN_WIDTH * window_scale
     local window_height = SCREEN_HEIGHT * window_scale
 
     if Kristal.bordersEnabled() then
         local border_width, border_height = Kristal.getRelativeBorderSize()
-        window_width                      = window_width + border_width
-        window_height                     = window_height + border_height
+        window_width = window_width + border_width
+        window_height = window_height + border_height
     end
 
     local properties = {
         fullscreen = Kristal.Config["fullscreen"],
         vsync = Kristal.Config["vSync"],
     }
+
+    if Kristal.isForcedFullscreen() then
+        properties.fullscreen = true
+    end
 
     local major, _, _, _ = love.getVersion()
 
@@ -1817,12 +1874,23 @@ function Kristal.resetWindow()
         properties
     )
 
-    -- Force tilelayers to redraw, since resetWindow destroys their canvases
-    if Game.world then
-        for _, tilelayer in ipairs(Game.world.stage:getObjects(TileLayer)) do
-            tilelayer.drawn = false
+    -- Force text to redraw, since resetWindow destroys their canvases.
+    -- TODO: not this...
+
+    local stages = { Kristal.Stage, Kristal.States["Testing"].stage, Game.stage, MainMenu.stage }
+
+    for _, stage in pairs(stages) do
+        if stage ~= nil then
+            for _, obj in ipairs(stage:getObjects(Text)) do
+                obj:forceRedraw()
+            end
         end
     end
+end
+
+---@return boolean forced Whether the game is forced to be in fullscreen mode (on mobile platforms and consoles).
+function Kristal.isForcedFullscreen()
+    return love.system.getOS() == "Android" or love.system.getOS() == "iOS" or Kristal.isConsole()
 end
 
 ---@return boolean console Whether Kristal is in console mode.
@@ -1832,11 +1900,30 @@ function Kristal.isConsole()
     return USING_CONSOLE or (love._console ~= nil) or (os == "NX")
 end
 
+function Kristal.getWindowScale()
+    if Kristal.Config["autoWindowScale"] then
+        local display_width, display_height = love.window.getDesktopDimensions()
+
+        local game_width, game_height = SCREEN_WIDTH, SCREEN_HEIGHT
+        if Kristal.bordersEnabled() then
+            game_width = BORDER_WIDTH * BORDER_SCALE
+            game_height = BORDER_HEIGHT * BORDER_SCALE
+        end
+
+        -- DR does a weird for loop to calculate the window scale, this is equivalent
+        -- Weirdly enough, DR doesn't allow exact matches - a 1280x960 display will still produce a 640x480 window... so neither does this
+
+        return MathUtils.clamp(math.ceil(math.min(display_width / game_width, display_height / game_height)) - 1, 1, 11)
+    end
+
+    return Kristal.Config["windowScale"]
+end
+
 ---@return table types The available border types, or `nil` if borders are disabled.
 function Kristal.getBorderTypes()
     local types = {}
 
-    if not Kristal.isConsole() then
+    if not Kristal.isForcedFullscreen() then
         table.insert(types, { "off", "OFF", nil })
     end
 
@@ -1849,7 +1936,7 @@ end
 
 ---@return boolean enabled Whether borders are enabled.
 function Kristal.bordersEnabled()
-    return Kristal.isConsole() or Kristal.Config["borders"] ~= "off"
+    return Kristal.isForcedFullscreen() or Kristal.Config["borders"] ~= "off"
 end
 
 --- Returns the dimensions of the screen border, or (0, 0) if borders are disabled.
@@ -1857,8 +1944,9 @@ end
 ---@return number height The height of the border.
 function Kristal.getBorderSize()
     if Kristal.bordersEnabled() then
-        return (BORDER_WIDTH * BORDER_SCALE) * Kristal.Config["windowScale"],
-            (BORDER_HEIGHT * BORDER_SCALE) * Kristal.Config["windowScale"]
+        local window_scale = Kristal.getWindowScale()
+        return (BORDER_WIDTH * BORDER_SCALE) * window_scale,
+            (BORDER_HEIGHT * BORDER_SCALE) * window_scale
     end
     return 0, 0
 end
@@ -1868,8 +1956,9 @@ end
 ---@return number height The height of the border.
 function Kristal.getRelativeBorderSize()
     if Kristal.bordersEnabled() then
-        return ((BORDER_WIDTH * BORDER_SCALE) - SCREEN_WIDTH) * Kristal.Config["windowScale"],
-            ((BORDER_HEIGHT * BORDER_SCALE) - SCREEN_HEIGHT) * Kristal.Config["windowScale"]
+        local window_scale = Kristal.getWindowScale()
+        return ((BORDER_WIDTH * BORDER_SCALE) - SCREEN_WIDTH) * window_scale,
+            ((BORDER_HEIGHT * BORDER_SCALE) - SCREEN_HEIGHT) * window_scale
     end
     return 0, 0
 end
@@ -1991,11 +2080,21 @@ function Kristal.getSoulFacing()
     return "up"
 end
 
---- Called internally. Loads the saved user config, with default values.
----@return table config The user config.
-function Kristal.loadConfig()
+--- Called internally. Returns the default config.
+---@return table config The default config.
+function Kristal.getDefaultConfig()
     local config = {
+        -- DPR-specific
+        projectLoadingMode = LoadingMode.SEMI_LAZY,
+        ["plugins/enabled_plugins"] = {},
+        dLoad = true,
+        altAttack = false,
+        brokenMenuBoxes = false,
+        musicDistort = true,
+
+        -- Kristal
         windowScale = 1,
+        autoWindowScale = true,
         skipIntro = false,
         showFPS = false,
         fps = 30,
@@ -2015,17 +2114,37 @@ function Kristal.loadConfig()
         rightStickDeadzone = 0.2,
         defaultName = "",
         skipNameEntry = false,
-        verboseLoader = false,
-        projectLoadingMode = LoadingMode.SEMI_LAZY,
-        ["plugins/enabled_plugins"] = {},
-        dLoad = true,
-        altAttack = false,
-        brokenMenuBoxes = false,
-        musicDistort = true
+        verboseLoader = false
     }
+
+    return config
+end
+
+--- Called internally. Loads the saved user config, with default values.
+---@return table config The user config.
+function Kristal.loadConfig()
+    local config = Kristal.getDefaultConfig()
+
     if love.filesystem.getInfo("settings.json") then
-        TableUtils.merge(config, JSON.decode(love.filesystem.read("settings.json")))
+        local success, message = pcall(JSON.decode, love.filesystem.read("settings.json"))
+        if not success then
+            print("Error loading settings.json: " .. tostring(message))
+            print("Using default config.")
+            return config
+        end
+
+        local config_type = type(message)
+        if config_type ~= "table" then
+            print("Error loading settings.json: Expected table, got " .. config_type)
+            print("Using default config.")
+            return config
+        end
+
+        TableUtils.merge(config, message)
+    else
+        print("No settings.json found, using default config.")
     end
+
     return config
 end
 
@@ -2048,6 +2167,7 @@ end
 --- Loads the game from a save file.
 ---@param id?   number  The save file index to load. (Defaults to the currently loaded save index)
 ---@param fade? boolean Whether the game should fade in after loading. (Defaults to `false`)
+---@return boolean valid If false, another DLC started to load. Used to stop Game from loading
 function Kristal.loadGame(id, fade)
     id = id or Game.save_id
     local data = Kristal.getSaveFile(id)
@@ -2056,15 +2176,22 @@ function Kristal.loadGame(id, fade)
         if data.mod == Mod.info.id then
             Game:load(data, id, fade)
         else
+            -- I think we need a better way to load into another DLC
+            -- This happens too late in the loading process
+            -- Because we don't switch before, we end up having to restart the whole process in the right DLC
             Kristal.setState({})
             Kristal.clearModState()
+            -- This function is async, which means we have to stop Game from loading itself
+            -- Otherwise it keeps loading without actually having data
             Kristal.loadAssets("", "mods", "", function()
                 Kristal.startGameDPR(id, data.name)
             end)
+            return false
         end
     else
         Game:load(nil, id, fade)
     end
+    return true
 end
 
 --- Returns the data from the specified save file.

@@ -178,30 +178,34 @@ end
 
 --- Hurts the party member `battler` by `amount`, or hurts the whole party for `amount`
 ---@overload fun(self: World, amount: number)
----@param battler   Character|string    The Character to hurt
----@param amount    number              The amount of damage to deal
----@return boolean  killed  Whether all targetted characters were knocked out by this damage
+---@param battler Character|string|integer|"ALL"? The Character to hurt
+---@param amount number The amount of damage to deal
+---@return boolean killed Whether all targetted characters were knocked out by this damage
 function World:hurtParty(battler, amount)
     Assets.playSound("hurt")
 
     self:shakeCamera()
     self:showHealthBars()
 
-    if type(battler) == "number" then
-        amount = battler
+    if amount == nil then
+        amount = battler --[[@as number]]
+        battler = nil
+    end
+
+    if battler == "ALL" then
         battler = nil
     end
 
     local any_killed = false
     local any_alive = false
-    for _, party in ipairs(Game.party) do
+    for index, party in ipairs(Game.party) do
         local current_amount = amount
 
         for _, item in ipairs(party:getEquipment()) do
             current_amount = item:onWorldDamage(current_amount) or current_amount
         end
 
-        if not battler or battler == party.id or battler == party then
+        if not battler or battler == party.id or battler == party or battler == index then
             local current_health = party:getHealth()
             party:setHealth(party:getHealth() - current_amount)
             if party:getHealth() <= 0 then
@@ -215,7 +219,9 @@ function World:hurtParty(battler, amount)
 
             for _, char in ipairs(self.stage:getObjects(Character)) do
                 if char.actor and (char.actor.id == party:getActor().id) and dealt_amount > 0 then
-                    char:statusMessage("damage", dealt_amount)
+                    if char.alpha > 0 then
+                        char:statusMessage("damage", dealt_amount)
+                    end
                 end
             end
         elseif party:getHealth() > current_amount then
@@ -245,14 +251,11 @@ function World:setState(state)
     self.state_manager:setState(state)
 end
 
---- Opens the main overworld menu
+--- Opens the main overworld menu. Make sure to check [`World:canOpenMenu()`](lua://World.canOpenMenu) before calling this function.
 ---@param menu?     Object  An optional menu instance to open
 ---@param layer?    number  The layer to create the menu on (defaults to `WORLD_LAYERS["ui"]` or `600`)
 ---@return Object?
 function World:openMenu(menu, layer)
-    if self:hasCutscene() then return end
-    if self:inBattle() then return end
-    if not self.can_open_menu then return end
 
     if self.menu then
         self.menu:remove()
@@ -374,6 +377,48 @@ function World:hideHealthBars()
     end
 end
 
+--- Whether or not the player should be able to interact with things.
+---
+---@return boolean interact_allowed
+function World:canInteract()
+    if self.player == nil then
+        return false
+    end
+
+    if self:hasCutscene() then
+        return false
+    end
+
+    if self.player:isClimbing() then
+        return false
+    end
+
+    return true
+end
+
+--- Whether or not the player should be able to open the menu.
+---
+---@return boolean menu_allowed
+function World:canOpenMenu()
+    if self:hasCutscene() then
+        return false
+    end
+
+    if self:inBattle() then
+        return false
+    end
+
+    if self.player and self.player:isClimbing() then
+        return false
+    end
+
+    if not self.can_open_menu then
+        return false
+    end
+
+    return true
+end
+
 --- Called whenever the state of the world changes
 ---@param old string
 ---@param new string
@@ -415,20 +460,34 @@ function World:onKeyPressed(key)
         end
         if key == "k" then
             Game:setTension(Game:getMaxTension())
+            Assets.playSound("cardrive")
         end
         if key == "n" then
             NOCLIP = not NOCLIP
+            if NOCLIP then
+                Assets.playSound("petrify")
+            else
+                Assets.playSound("bump")
+            end
+        end
+        if key == "i" then
+            INVINCIBILITY = not INVINCIBILITY
+            if INVINCIBILITY then
+                Assets.playSound("sparkle_glock")
+            else
+                Assets.playSound("bump")
+            end
         end
     end
 
     if Game.lock_movement then return end
 
     if self.state == "GAMEPLAY" then
-        if Input.isConfirm(key) and self.player and not self:hasCutscene() then
+        if Input.isConfirm(key) and self:canInteract() then
             if self.player:interact() then
                 Input.clear("confirm")
             end
-        elseif Input.isMenu(key) and not self:hasCutscene() then
+        elseif Input.isMenu(key) and self:canOpenMenu() then
             self:openMenu(nil, WORLD_LAYERS["ui"] + 1)
             Input.clear("menu")
         end
@@ -510,7 +569,7 @@ end
 ---@overload fun(self: World, id: string, ...)
 ---@overload fun(self: World, func: WorldCutsceneFunc, ...)
 ---@param group string  The name of the group the cutscene is a part of
----@param id    string  The id of the cutscene 
+---@param id    string  The id of the cutscene
 ---@param ...   any     Additional arguments that will be passed to the cutscene function
 ---@return WorldCutscene?   The cutscene object that was created
 function World:startCutscene(group, id, ...)
@@ -572,6 +631,7 @@ function World:spawnPlayer(...)
     local args = { ... }
 
     local x, y = 0, 0
+    local state = "WALK"
     local chara = self.player and self.player.actor
     local party
     if #args > 0 then
@@ -579,10 +639,15 @@ function World:spawnPlayer(...)
             x, y = args[1], args[2]
             chara = args[3] or chara
             party = args[4]
-        elseif type(args[1]) == "string" then
-            x, y = self.map:getMarker(args[1])
+        elseif type(args[1]) == "string" or type(args[1]) == "table" then
+            local data
+            x, y, data = self.map:getMarker(args[1])
             chara = args[2] or chara
             party = args[3]
+
+            if data ~= nil then
+                state = data.player_state or "WALK"
+            end
         end
     end
 
@@ -600,6 +665,7 @@ function World:spawnPlayer(...)
     self.player = Player(chara, x, y)
     self.player.layer = self.map.object_layer
     self.player:setFacing(facing)
+    self.player:setState(state)
     self:addChild(self.player)
 
     if party then
@@ -737,8 +803,8 @@ function World:spawnFollower(chara, options)
 end
 
 --- Spawns characters in the world for the current party
----@param marker?   string|{x: number, y: number}                               The marker or coordinates to spawn the player at
----@param party?    (PartyMember|string)[]                                      A table of party members to spawn (Defaults to [`Game.party`](lua://Game.party))    
+---@param marker?   string|KristalObjectRef|Position                            The marker or coordinates to spawn the player at
+---@param party?    (PartyMember|string)[]                                      A table of party members to spawn (Defaults to [`Game.party`](lua://Game.party))
 ---@param extra?    (Follower|Actor|string|[Follower|Actor|string,integer])[]   Additional followers to add that are not in the party (defaults to [`Game.temp_followers`](lua://Game.temp_followers))
 ---@param facing?   FacingDirection                                             The direction the party should be facing when they spawn
 function World:spawnParty(marker, party, extra, facing)
@@ -749,14 +815,22 @@ function World:spawnParty(marker, party, extra, facing)
                 party[i] = Game:getPartyMember(chara)
             end
         end
-        if type(marker) == "table" then
+
+        if type(marker) == "table" and marker[1] ~= nil and marker[2] ~= nil then
+            -- It's a position table...
             self:spawnPlayer(marker[1], marker[2], party[1]:getActor(), party[1].id)
         else
-            self:spawnPlayer(marker or "spawn", party[1]:getActor(), party[1].id)
+            if not self.map:hasMarker(marker) then
+                marker = "spawn"
+            end
+
+            self:spawnPlayer(marker, party[1]:getActor(), party[1].id)
         end
+
         if facing then
             self.player:setFacing(facing)
         end
+
         for i = 2, #party do
             local follower = self:spawnFollower(party[i]:getActor(), { party = party[i].id })
             follower:setFacing(facing or self.player:getFacing())
@@ -867,15 +941,17 @@ function World:partyReact(party_member, text, display_time)
     end
 end
 
---- Gets a specific event present in the current map
----@param id string|number  The unique numerical id of an event OR the text id of an event type to get the first instance of
----@return Event event The event instnace, or `nil` if it was not found
+--- Gets a specific event present in the current map.
+---
+--- If multiple objects are found (if you pass in a name), only the first will be returned. Use `Map:getEvents` to get all of them.
+---@param id string|number|TiledObjectRef The id of the event to search for, either as a string or a number
+---@return Event event The name of the event, the unique numerical ID, or a Tiled object reference.
 function World:getEvent(id)
     return self.map:getEvent(id)
 end
 
---- Gets a list of all instances of one type of event in the current maps
----@param name? string The text id of the event to search for, fetches every event if `nil`
+--- Gets all instances of an event present in the current map.
+---@param name? string The text id of the event to search for. If left unspecified, all events will be returned.
 ---@return Event[] events A table containing every instance of the event in the current map
 function World:getEvents(name)
     return self.map:getEvents(name)
@@ -997,7 +1073,7 @@ function World:loadMap(...)
     -- x, y, facing, callback
     local map = table.remove(args, 1)
     local marker, x, y, facing, callback
-    if type(args[1]) == "string" then
+    if type(args[1]) == "string" or type(args[1]) == "table" then
         marker = table.remove(args, 1)
     elseif type(args[1]) == "number" then
         x = table.remove(args, 1)
@@ -1044,6 +1120,10 @@ function World:loadMap(...)
     end
 
     self:setState("GAMEPLAY")
+
+    if self.player then
+        self.player:onMapLoad()
+    end
 
     for _, event in ipairs(self.map.events) do
         if event.postLoad then
@@ -1150,7 +1230,7 @@ end
 --- Loads a new map and starts the transition effects for world music, borders, and the screen as a whole
 ---@overload fun(self: World, map: string, ...: any)
 ---@param ... any   Additional arguments that will be passed into World:loadMap()
----@see World - World:loadMap() 
+---@see World - World:loadMap()
 function World:mapTransition(...)
     local args = { ... }
     local map = args[1]
@@ -1249,10 +1329,32 @@ function World:setBattle(value)
     self.in_battle = value
 end
 
---- Whether the player is currently in a world battle
+--- Whether the player is currently in a "world battle".
 ---@return boolean
 function World:inBattle()
+    if self.player and self.player:isClimbing() then
+        return false
+    end
+
     return self.in_battle or self.in_battle_area
+end
+
+--- Whether WorldBullets should hurt the player.
+---@return boolean
+function World:shouldBulletsHurt()
+    if self.player and self.player:isClimbing() then
+        return true
+    end
+
+    return self:inBattle()
+end
+
+function World:shouldCharacterCollide(char)
+    if char.is_player and char:isClimbing() then
+        return false
+    end
+
+    return true
 end
 
 function World:update()
@@ -1264,7 +1366,7 @@ function World:update()
         for _, obj in ipairs(self.children) do
             if not obj.solid and (obj.onCollide or obj.onEnter or obj.onExit) then
                 for _, char in ipairs(self.stage:getObjects(Character)) do
-                    if obj:collidesWith(char) then
+                    if obj:collidesWith(char) and self:shouldCharacterCollide(char) then
                         if not obj:includes(OverworldSoul) then
                             table.insert(collided, { obj, char })
                         end
@@ -1277,7 +1379,7 @@ function World:update()
         Object.endCache()
         for _, v in ipairs(collided) do
             if v[1].onCollide then
-                v[1]:onCollide(v[2], DT)
+                v[1]:onCollide(v[2])
             end
             if not v[1].current_colliding then
                 v[1].current_colliding = {}
@@ -1306,7 +1408,7 @@ function World:update()
     local half_alpha = self.battle_alpha * 0.52
 
     for _, v in ipairs(self.followers) do
-        v.sprite:setColor(1 - half_alpha, 1 - half_alpha, 1 - half_alpha, 1)
+        v.sprite:setColor(1 - half_alpha, 1 - half_alpha, 1 - half_alpha)
     end
 
     for _, battle_border in ipairs(self.map.battle_borders) do

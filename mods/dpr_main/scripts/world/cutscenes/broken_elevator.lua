@@ -43,11 +43,17 @@ return function(cutscene)
     elseif Game:hasPartyMember("hero") and Game:hasPartyMember("susie") then
         local hero = cutscene:getCharacter("hero")
         local susie = cutscene:getCharacter("susie")
-        
+        local len = cutscene:getCharacter("len")
         
         cutscene:wait(5)
         cutscene:textTagged("* You might wanna get comfy.[wait:5] This'll take a while.", "neutral_closed_b", "hero")
         cutscene:textTagged("* Uh,[wait:5] if you say so.", "suspicious", "susie")
+
+        if len then
+            cutscene:textTagged("* Okay then.", "neutral", "len")
+            cutscene:detachFollowers()
+            cutscene:walkTo(len, 408, 308, 1)
+        end
         
         -- Susie walks to the left wall and leans on it.
         cutscene:detachFollowers()
@@ -55,6 +61,13 @@ return function(cutscene)
         cutscene:wait(1)
         Assets.playSound("wing")
         susie:setSprite("wall_right")
+
+        if len then
+            cutscene:wait(0.3)
+            Assets.playSound("wing")
+            len:setSprite("sit")
+            len.scale_x = len.scale_x * -1
+        end
         
         cutscene:wait(5)
         
@@ -85,6 +98,11 @@ return function(cutscene)
         end)
         cutscene:textTagged("* We're not stuck here,[wait:5] are we...?", "annoyed_down", "susie")
         cutscene:wait(2)
+
+        if len then
+            cutscene:textTagged("* Wouln't be the first time, [wait:5]heh.", "neutral_closed_b", "len")
+            cutscene:textTagged("* ...[wait:5]And what's that supposed to mean?", "annoyed", "susie")
+        end
         
         -- Hero does something with the elevator panel...
         hero:setSprite("walk/up_4")
@@ -124,6 +142,14 @@ return function(cutscene)
         susie:setFacing("down")
         susie:resetSprite()
 
+        if len then
+            len.scale_x = len.scale_x * -1
+            len:setSprite("walk/left")
+
+            -- Len gets pushed away very rudely by Hero
+            cutscene:walkTo(len, 428, 292, 0.3, "left")
+        end
+
         -- Hero walks over to the door.
         hero:walkToSpeed(316, 354, 4, "down")
         cutscene:showNametag("Hero", {top = true})
@@ -135,6 +161,10 @@ return function(cutscene)
         -- Hero looks back at Susie, and they get moving.
         hero:setFacing("up")
         cutscene:textTagged("* About time.[wait:5] Let's get moving.", "smirk", "susie")
+
+        if len then
+            len:resetSprite()
+        end
 
         hero:setFacing("down")
         cutscene:wait(cutscene:attachFollowers())

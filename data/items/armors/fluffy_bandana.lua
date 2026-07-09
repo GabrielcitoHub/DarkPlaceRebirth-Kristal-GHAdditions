@@ -50,11 +50,57 @@ function item:init()
         noelle = "It's like a comfy bed!",
         dess = "Yummy red",
         jamm = "How do i even put this on?",
+        calypso = "It be very fluffy...",
         brenda = "Its soo red!",
         mario = "Lets a go!",
         noel = "This isn't stolen ... right?",
         ceroba = "Red's nice...",
+        len = "Fluffy, and somehow comforting.",
     }
+end
+
+---@param character PartyMember
+function item:onEquip(character, replacement)
+    if character.id == "len" then
+        local resolution = Game:getFlag("ken_quest_resolution")
+        if resolution == 3 then
+            Game:setFlag("ken_quest_gaveBandana", false)
+        end
+    end
+
+    return true
+end
+
+---@param character Character
+function item:onUnequip(character, replacement)
+    if character.id == "len" then
+        local resolution = Game:getFlag("ken_quest_resolution")
+        if resolution == 3 then
+            local sIndex
+            for index, chara in ipairs(Game.party) do
+                if chara.id == character.id then
+                    sIndex = index
+                    break
+                end
+            end
+
+            Game.world.healthbar.action_boxes[sIndex]:react("I think it'll be safer with me...")
+            return false
+        end
+    end
+
+    return true
+end
+
+function item:onPedestalSelect()
+    return not Game:getQuest("delivering_a_bandana"):isCompleted()
+end
+
+---@param cutscene WorldCutscene
+function item:onPedestalUse(cutscene)
+    Game.inventory:removeItem(self)
+    Game:getQuest("delivering_a_bandana"):addProgress(1)
+    cutscene:text("* ([color:yellow]" .. self:getName() .. "[color:reset] has been delivered correctly.)")
 end
 
 return item

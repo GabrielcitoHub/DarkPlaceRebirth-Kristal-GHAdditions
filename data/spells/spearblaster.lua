@@ -110,10 +110,16 @@ function spell:getDamage(user, target)
     if Game:isLight() then
         local damage = math.ceil((user.chara:getStat("magic") * 2) + user.chara:getStat("attack") - target.defense)
         damage = math.ceil(damage/target:getResistance("ELEC"))
+        if (Game.battle and Game.battle.headwind > 0) then
+            damage = math.floor(damage * 1.25)
+        end
         return damage
     else
         local damage = math.ceil((user.chara:getStat("magic") * 3) + (user.chara:getStat("attack") * 1.5) - (target.defense * 2))
         damage = math.ceil(damage/target:getResistance("ELEC"))
+        if (Game.battle and Game.battle.headwind > 0) then
+            damage = math.floor(damage * 1.25)
+        end
         return damage
     end
 end

@@ -46,7 +46,9 @@ function item:init()
 
     -- Character reactions (key = party member id)
     self.reactions = {
-        jamm = "So what was up with that guy...?"
+        jamm = "So what was up with that guy...?",
+        ceroba = "At least it's good. I think.",
+        calypso = "Huh... Interesting.",
     }
 end
 

@@ -64,6 +64,14 @@ function MainMenuTitle:onEnter(old_state)
     self.continue_text:setParent(MainMenu.stage)
 
     self.debounce = false
+
+    -- Spawn uiiai easter egg
+    local rng = love.math.random(1,10)
+    if rng == 1 then
+        local uiiai = Sprite("kristal/uiiai", 20, 20, 16, 16)
+        uiiai:play(1/4, true)
+        MainMenu.stage:addChild(uiiai)
+    end
 end
 
 function MainMenuTitle:onKeyPressed(key, is_repeat)

@@ -102,6 +102,11 @@ end
 
 function spell:onLightCast(user, target)
 	local damage = self:getDamage(user, target)
+    
+    if (Game.battle and Game.battle.headwind > 0) then
+        damage = math.floor(damage * 1.25)
+    end
+    
     self.flowers = {}
     local targetX, targetY = target:getRelativePos(target.width / 2, target.height / 2, Game.battle)
     local positions = {

@@ -45,6 +45,11 @@ function spell:onCast(user, target)
 			flower:play(1/10)
 			flower:slideToSpeed(targetX, targetY, 20, function()
 				local damage = math.ceil(((user.chara:getStat("magic") - 10) * 9) + 30 + Utils.random(10))
+                
+                if (Game.battle and Game.battle.headwind > 0) then
+                    damage = math.floor(damage * 1.25)
+                end
+                
 				enemy:hurt(damage, user)
 
 				Assets.playSound("damage")
@@ -100,6 +105,11 @@ function spell:onLightCast(user, target)
 			flower:play(1/10)
 			flower:slideToSpeed(targetX, targetY, 20, function()
 				local damage = math.ceil((user.chara:getStat("magic") * 7) + 15 + Utils.random(5))
+    
+                if (Game.battle and Game.battle.headwind > 0) then
+                    damage = math.floor(damage * 1.25)
+                end
+                
 				enemy:hurt(damage, user)
 
 				Assets.playSound("damage")

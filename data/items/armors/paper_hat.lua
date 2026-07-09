@@ -49,7 +49,8 @@ function item:init()
         brenda = false,
         mario = false,
         noel = false,
-        ceroba = false
+        ceroba = false,
+        calypso = false,
     }
 
     -- Character reactions
@@ -60,10 +61,12 @@ function item:init()
         noelle = "...",
         dess = "Ew",
         jamm = "Why?",
+        calypso = "...Ye can't be serious...",
         brenda = "Its too weak!",
         mario = "Mari-no",
         noel = "...",
         ceroba = "That's just childish.",
+        len = "*Chuckle*",
     }
 end
 

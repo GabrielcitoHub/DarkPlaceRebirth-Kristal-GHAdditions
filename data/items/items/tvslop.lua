@@ -41,9 +41,10 @@ function item:init()
         susie = "Like my old school.",
         ralsei = "Is this legal?",
         noelle = "Here, I refreezed it!",
-        ceroba = "It's not bad, actually.",
+        ceroba = "It's not that bad, actually.",
         dess = "i am the great mighty poo",
-        jamm = "...School food. Yuck."
+        jamm = "...School food. Yuck.",
+        calypso = "This be a meal I had on the boat.",
     }
 end
 

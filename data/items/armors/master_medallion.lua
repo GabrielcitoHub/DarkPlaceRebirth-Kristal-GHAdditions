@@ -49,6 +49,8 @@ function item:init()
         ralsei = "",
         noelle = "",
         jamm = "I feel like a master!",
+        ceroba = "I'm not sure if it's a good idea...",
+        calypso = "Aye aye, captain!",
     }
 
     -- Character reactions to wearing two
@@ -57,13 +59,15 @@ function item:init()
         ralsei = "",
         noelle = "",
         jamm = "The ultimate daredevil!!!",
+        ceroba = "... at least I still have my shield.",
+        calypso = "Full speed ahead!",
     }
 end
 
 function item:getReaction(user_id, reactor_id, miniparty)
     local pm = Game:getPartyMember(reactor_id)
     local success, amount = pm:checkArmor("master_medallion")
-    
+
     if amount == 0 then
         if miniparty and self.reactions[reactor_id.."+"..miniparty] then
             return self.reactions[reactor_id.."+"..miniparty]

@@ -191,124 +191,16 @@ local devroom = {
 			end
         end
     end,
-    
-    arleev = function(cutscene, npc)
-        if npc.interact_count == 1 then
-        local arlee = cutscene:getCharacter('arlee')
-        cutscene:setSpeaker(arlee)
-        cutscene:showNametag("arlee")
-        cutscene:text("* its me arlee!")
-        cutscene:text("* arlee for you! arlee for everyone!")
-        cutscene:text("* arlee for the workers! arlee for the bums!")
-        cutscene:text("* arlee for the kids and the teens too!")
-        cutscene:text("* acquire an arlee on arleebuybuybuy.neocities.org!!!")
-        if cutscene:getCharacter('brenda') then
-            cutscene:setSpeaker("brenda")
-            cutscene:showNametag("Brenda")
-			cutscene:textTagged("*...[wait:5] What.", "shocked", "brenda")
-            cutscene:setSpeaker("arlee")
-            arlee:setAnimation({"tpose"})
-            cutscene:showNametag("arlee")
-			cutscene:textTagged("* wait the voices in my head are telling me smth")
-            Game.world.music:pause()
-            local ominous = Music("AUDIO_DRONE")
-            ominous:play()
-            cutscene:wait(5)
-            ominous:remove()
-            Game.world.music:resume()
-            arlee:setAnimation({"idle", 0.01, true})
-            cutscene:textTagged("* oops! guess we are out of stock!")
-            cutscene:textTagged("* come back other day!")
-            arlee:setAnimation({"idle", 0.045, true})
-            cutscene:hideNametag()
-		elseif cutscene:getCharacter("ddelta") then
-			cutscene:setSpeaker("ddelta")
-            cutscene:showNametag("DDelta")
-            cutscene:textTagged("* the world has never been the same since Mr. (Ant) Tenna", "helpme", "ddelta")
-            arlee:setAnimation({"tpose"})
-            cutscene:setSpeaker("arlee")
-            cutscene:showNametag("arlee")
-            Game.world.music:pause()
-            cutscene:textTagged("* tenna....")
-            arlee:setAnimation({"kick", 0.045, true})
-            Game.world.music:resume()
-            cutscene:textTagged("* tenna is a faker ok? you dont compare me to that fucker")
-            arlee:setAnimation({"idle", 0.045, true})
-            cutscene:hideNametag()
-		elseif cutscene:getCharacter("jamm") then
-            cutscene:setSpeaker("jamm")
-			cutscene:showNametag("jamm")
-            cutscene:textTagged("* Sorry,[wait:5] still paying student loans.", "nervous", "jamm")
-            cutscene:setSpeaker("arlee")
-			cutscene:showNametag("arlee")
-            arlee:setAnimation({"tpose", 0.045, true})
-            cutscene:textTagged("* Oh.")
-            arlee:setAnimation({"kick", 0.01, true})
-            cutscene:textTagged("* well youre losing! losing on the best oppurtunity of your life!")
-            arlee:setAnimation({"pose", 0.045, true})
-            cutscene:textTagged("* im too good to you anyway")
-            arlee:setAnimation({"idle", 0.045, true})
-            cutscene:hideNametag()
-        end
-        cutscene:hideNametag()
-    end
-    if npc.interact_count == 2 then
-        local arlee = cutscene:getCharacter('arlee')
-        cutscene:setSpeaker(arlee)
-        cutscene:showNametag("arlee")
-        arlee:setAnimation({"tpose", 0.045, true})
-        cutscene:text("* hey uh could do me a favor rq")
-        cutscene:text("* i like lost some parts of myself no big deal")
-        cutscene:text("* if you find any can you return it to me? it will be worth it i swear")
-        local choicer = cutscene:choicer({"Yes", "No"})
-        if choicer == 1 then
-           cutscene:text("* awesome! i will be at my evil lair come find me there once you have a star bit")
-           cutscene:hideNametag()
-           cutscene:slideTo(arlee, arlee.x, arlee.y - 600, 1)
-           arlee:setAnimation({"idle", 0.01, true})
-           cutscene:wait(4)
-           Game:getQuest("stargazer"):unlock()
-           Game:setFlag("arlee_quest", true)
-        else
-            cutscene:text("* Wrong choice.")
-            arlee:setAnimation({"idle", 0.045, true})
-            cutscene:hideNametag()
-        end
-    else
-        local arlee = cutscene:getCharacter('arlee')
-        cutscene:setSpeaker(arlee)
-        cutscene:showNametag("arlee")
-        arlee:setAnimation({"tpose", 0.045, true})
-        cutscene:text("* hey uh could do me a favor rq")
-        cutscene:text("* i like lost some parts of myself no big deal")
-        cutscene:text("* if you find any can you return it to me? it will be worth it i swear")
-        local choicer = cutscene:choicer({"Yes", "No"})
-        if choicer == 1 then
-           cutscene:text("* awesome! i will be at my evil lair come find me there once you have a star bit")
-           cutscene:hideNametag()
-           cutscene:slideTo(arlee, arlee.x, arlee.y - 600, 4)
-           arlee:setAnimation({"idle", 0.001, true})
-           cutscene:wait(4)
-           Game:getQuest("stargazer"):unlock()
-           Game:setFlag("arlee_quest", true)
-           Game:setFlag("star_bits", 0)
-        else
-            cutscene:text("* Wrong choice.")
-            arlee:setAnimation({"idle", 0.045, true})
-            cutscene:hideNametag()
-        end
-    end
-    end,
 
     arlee = function(cutscene, npc)
         local arlee = cutscene:getCharacter('arlee')
         cutscene:setSpeaker(arlee)
         cutscene:showNametag("*+arlee*+")
         
-        cutscene:text("oh hi!")
-        cutscene:text("im uh arlee, yeah thats me.")
+        cutscene:text("oh hi")
+        cutscene:text("im arlee")
         
-        cutscene:text("I have some stuff??? For sale??? if you wanna buy")
+        cutscene:text("I have some stuff For sale if you wanna buy")
         cutscene:text("its nothing super special honestly just stuff")
         
         cutscene:hideNametag()
@@ -317,9 +209,9 @@ local devroom = {
         
         cutscene:showNametag("*+arlee*+")
         if choice == 1 then
-            cutscene:text("oh thank you!")
+            cutscene:text("okay")
             cutscene:text("ill get it ready just uh meet me in my room")
-            cutscene:text("see you there!!")
+            cutscene:text("see you there")
             cutscene:hideNametag()
             cutscene:slideTo(arlee, arlee.x, arlee.y - 600, 4)
             Game:setFlag("arlee_quest", true)
@@ -519,5 +411,71 @@ local devroom = {
     blend_invfull = function(cutscene, event)
 		cutscene:text("* You don't have enough space.\n* (TODO: Make Alexa say this)")
 	end,
+    chara = function(cutscene, npc)
+        local chara = cutscene:getCharacter('chara')
+        cutscene:setSpeaker(chara)
+        
+        cutscene:text("* Greetings.")
+        cutscene:text("* I, am Chara.[wait:3]\n* From Undertale.")
+
+        local choice = cutscene:choicer({"Can I\nhave apple", "", "chara do the thing please"})
+        
+        if choice == 1 then
+            chara:setAnimation("ohdamnreally")
+            cutscene:text("* Oh uh")
+            chara:setAnimation("embarrassed")
+            cutscene:text("* Damn lmao, this is awkward,, uhh...")
+            chara:setAnimation("smile")
+            cutscene:text("* This is placeholder dialogue until I finish the heese (Plural of horse) battle lmao")
+            chara:setAnimation("idle")
+        end
+        if choice == 2 then
+            if love.math.random(1,5) == 5 then
+            chara:setAnimation("pixel")
+            cutscene:text("[noskip]* H[wait:3]ey [wait:1]did [color:red]y[wait:1]o[wait:2]u[wait:3][color:white] kn[wait:6]ow [wait:1]th[wait:4]at[wait:1], my [wait:2]sp[wait:4]ri[wait:1]t[wait:6]e[wait:1], [wait:3][color:yellow]act[color:white][wait:8]ua[wait:1]l[wait:2]ly [wait:4]ha[wait:8]s 1[wait:1]8[wait:8] uni[wait:2]qu[wait:4]e c[wait:3]o[wait:3]l[wait:3]o[wait:3]u[wait:3]r[wait:3]s[wait:3] no[wait:9]r[wait:1]ma[wait:2]ll[wait:4]y[wait:9]?")
+        else
+            chara:setAnimation("what")
+            cutscene:text("* please say something ill go crazy if you wont")
+        end
+        chara:setAnimation("idle")
+    end
+        if choice == 3 then
+            if love.math.random(1,2) == 1 then
+            chara:setAnimation("bored")
+            cutscene:text("* What. What thing.")
+            cutscene:text("* Um. Do you mean the funny narration thing?")
+            cutscene:setSpeaker(nil)
+            cutscene:text("* You nod.")
+            cutscene:setSpeaker('chara')
+            chara:setAnimation("shrug")
+            cutscene:text("* no")
+            cutscene:text("[noskip]* .[wait:5].[wait:5].[wait:10]",{auto=true})
+            cutscene:text("[noskip]* .[wait:7].[wait:8].[wait:9]",{auto=true})
+            cutscene:text("[noskip]* .[wait:6].[wait:2].[wait:6].[wait:10].[wait:10]",{auto=true})
+            chara:setAnimation("facepalm")
+            cutscene:text("* ok fine")
+            chara:setAnimation("bored")
+            cutscene:text("*[voice:charahigh] (You go walk away,)[voice:chara][wait:10] or whatever.")
+            else
+            chara:setAnimation("bored")
+            cutscene:text("* What. What thing.")
+            cutscene:text("* Um. Do you mean the funny genocides thing?")
+            cutscene:setSpeaker(nil)
+            cutscene:text("* You nod furiously.")
+            cutscene:setSpeaker('chara')
+            chara:setAnimation("facepalm")
+            cutscene:text("* no")
+            cutscene:text("[noskip]* .[wait:2].[wait:11].[wait:6]",{auto=true})
+            cutscene:text("[noskip]* .[wait:7].[wait:1].[wait:9]",{auto=true})
+            cutscene:text("[noskip]* .[wait:16].[wait:4].[wait:1].[wait:9].[wait:10]",{auto=true})
+            chara:setAnimation("bored")
+            cutscene:text("* ok fine")
+            chara:setAnimation("shrug")
+            cutscene:wait(3)
+            cutscene:text("*[voice:charahigh][color:red] Three left (=[color:white],[voice:chara][wait:10] or whatever.")
+            end
+            chara:setAnimation("idle")
+        end
+    end,
 }
 return devroom

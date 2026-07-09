@@ -13,8 +13,8 @@ function actor:init(style)
     self.height = 43
 
     -- Hitbox for this actor in the overworld (optional, uses width and height by default)
-    self.hitbox = {3, 31, 18, 14}
-    
+    self.hitbox = {3, 31, 19, 14}
+
     -- A table that defines where the Soul should be placed on this actor if they are a player.
     -- First value is x, second value is y.
     self.soul_offset = {12.5, 24}
@@ -85,12 +85,15 @@ function actor:init(style)
         -- Cutscene animations
         ["jump_fall"]           = {"fall", 1/5, true},
         ["jump_ball"]           = {"ball", 1/15, true},
+        ["jump_ball_slow"]      = {"ball", 4/30, true},
 
         ["diagonal_kick_right"] = {"diagonal_kick_right", 4/30, false},
         ["diagonal_kick_left"] = {"diagonal_kick_left", 4/30, false},
 
         ["laugh_right"] = {"laugh_right", 0.2, true},
         ["away_scratch"] = {"away_scratch", 0.2, true},
+
+        ["kneel_heal_alt_right"] = {"kneel_heal_alt_right", 1/4, false},
 
         -- all animation speeds below are probably incorrect so feel free to fix 'em
         ["look_back_whisper_look"] = {"look_back_whisper_look", 0.2, true},

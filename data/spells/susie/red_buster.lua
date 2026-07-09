@@ -73,9 +73,12 @@ function spell:getDamage(user, target, damage_bonus)
     local damage = math.ceil((user.chara:getStat("magic") * 6) + (user.chara:getStat("attack") * 13) - (target.defense * 6)) + 90 + damage_bonus
     damage = math.ceil(damage/target:getResistance("RED"))
     if user.chara:checkWeapon("virobuster") then
-        if target.health <= target.chara:getStat("health") / 2 then
+        if target.health <= target.max_health / 2 then
             damage = damage * 2
         end
+    end
+    if (Game.battle and Game.battle.headwind > 0) then
+        damage = math.floor(damage * 1.25)
     end
     return damage
 end

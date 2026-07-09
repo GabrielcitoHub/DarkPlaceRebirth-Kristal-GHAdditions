@@ -45,7 +45,8 @@ function item:init()
 		noelle = false,
 		dess = false,
         brenda = false,
-        ceroba = false
+        ceroba = false,
+        calypso = false,
 	}
 
     -- Character reactions
@@ -57,10 +58,12 @@ function item:init()
         brenda = "How the hell does this work?",
 		jamm = "I could use some lead, but if I have to sell it...",
         ["jamm+marcy"] = "That reminds me. Never eat Lunchables, Marcy.",
+        calypso = "...Really?",
         noel = "Eat Lead!",
         ceroba = "The heck do I do with that?",
         suzy = "I am so good at this!",
         hero = "Free cash.",
+        len = "Time to make lead!... that's what this does, right?",
     }
 end
 

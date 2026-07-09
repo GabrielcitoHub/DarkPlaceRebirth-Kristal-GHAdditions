@@ -56,6 +56,11 @@ function spell:onCast(user, target)
         local tx, ty = target:getRelativePos(target.width/2, target.height/2, Game.battle)
         local blast = RudeBusterBeam(false, x, y, tx, ty, function(pressed)
             local damage = math.ceil((user.chara:getStat("magic") * 5) + (user.chara:getStat("attack") * 11) - (target.chara:getStat("defense") * 3))
+    
+            if (Game.battle and Game.battle.headwind > 0) then
+                damage = math.floor(damage * 1.25)
+            end
+            
             if pressed then
                 damage = damage + 30
                 Assets.playSound("scytheburst")

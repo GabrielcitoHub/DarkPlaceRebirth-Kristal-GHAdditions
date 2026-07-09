@@ -48,22 +48,22 @@ local hub = {
                 dess:resetSprite()
             else
                 cutscene:walkTo(dess, x, y + 40, 0.75, "up")
-                
+
                 cutscene:wait(1.5)
-                
+
                 cutscene:wait(cutscene:walkTo(dess, x, y + 60, 0.5, "up", true))
                 cutscene:wait(cutscene:walkTo(dess, x, y + 20, 0.2))
-                
+
                 Assets.playSound("impact")
                 dess:shake(4)
-                
+
                 cutscene:slideTo(dess, x, y + 60, 0.1)
                 cutscene:wait(1.5)
-                
+
                 dess:resetSprite()
                 dess:shake(4)
                 Assets.playSound("wing")
-                
+
                 cutscene:wait(1)
 
                 cutscene:showNametag("Dess")
@@ -75,24 +75,25 @@ local hub = {
             cutscene:attachFollowers()
             Game:setFlag("wall_hit", true)
         else
-    
+
             -- If we have Susie, play a cutscene
             local susie = cutscene:getCharacter("susie")
+            local len = cutscene:getCharacter("len")
             if susie then
                 -- Detach camera and followers (since characters will be moved)
                 cutscene:detachCamera()
                 cutscene:detachFollowers()
-    
+
                 -- All text from now is spoken by Susie
                 cutscene:showNametag("Susie")
                 cutscene:setSpeaker(susie)
                 cutscene:text("* Hey,[wait:5] think I can break\nthis wall?", "smile")
                 cutscene:hideNametag()
-    
+
                 -- Get the bottom-center of the broken wall
                 local x = event.x + event.width/2
                 local y = event.y + event.height/2
-    
+
                 if Game:getFlag("wall_hit", false) then
                     cutscene:walkTo(Game.world.player, x, y + 100, 0.75, "up")
                     cutscene:walkTo(susie, x, y + 60, 0.75, "up")
@@ -103,10 +104,10 @@ local hub = {
                         cutscene:walkTo("noelle", x, y + 100, 0.75, "up")
                     end
                     cutscene:wait(1)
-    
+
                     -- wall guardian appearing
                     local wall = Game.world:spawnObject(NPC("wall", x, 0, {cutscene = "hub.wall_guardian"}))
-    
+
                     Assets.playSound("drive")
                     cutscene:slideTo(wall, wall.x, y + 60, 0.5)
                     cutscene:wait(0.25)
@@ -122,7 +123,7 @@ local hub = {
                     susie:setAnimation({"away_scratch", 0.25, true})
                     susie:shake(4)
                 else
-                    
+
                     -- Move Susie up to the wall over 0.75 seconds
                     cutscene:walkTo(susie, x, y + 40, 0.75, "up")
                     -- Move other party members behind Susie
@@ -133,42 +134,112 @@ local hub = {
                     if cutscene:getCharacter("noelle") then
                         cutscene:walkTo("noelle", x - 60, y + 100, 0.75, "up")
                     end
-                    
+
                     -- Wait 1.5 seconds
                     cutscene:wait(1.5)
-                    
+
                     -- Walk back,
                     cutscene:wait(cutscene:walkTo(susie, x, y + 60, 0.5, "up", true))
                     -- and run forward!
                     cutscene:wait(cutscene:walkTo(susie, x, y + 20, 0.2))
-                    
+
                     -- Slam!!
                     Assets.playSound("impact")
                     susie:shake(4)
                     susie:setSprite("shock_up")
-                    
+
                     -- Slide back a bit
                     cutscene:slideTo(susie, x, y + 40, 0.1)
                     cutscene:wait(1.5)
-                    
+
                     -- owie
                     susie:setAnimation({"away_scratch", 0.25, true})
                     susie:shake(4)
                     Assets.playSound("wing")
-                    
+
                     cutscene:wait(1)
-    
+
                     cutscene:showNametag("Susie")
                     cutscene:text("* Guess not.", "nervous")
+
+                    if len then
+                        cutscene:textTagged("* My turn!", "neutral", "len")
+                        
+                        susie:resetSprite()
+
+                        cutscene:walkTo(susie, susie.x - 80, susie.y, 0.75, "right")
+
+                        -- Walk back,
+                        cutscene:wait(cutscene:walkTo(len, x, y + 60, 0.5, "up", true))
+                        -- and run forward!
+                        Assets.playSound("laz_c_len")
+                        cutscene:wait(cutscene:walkTo(len, x, y + 20, 0.2))
+                        
+                        -- Slam!!
+                        Assets.playSound("impact")
+                        Assets.playSound("hurt")
+                        len:shake(4)
+                        len:setSprite("fell")
+
+                        local lenParty = len:getPartyMember()
+                        if lenParty then
+                            lenParty.health = lenParty.health - 1
+                            if lenParty.health <= 0 then
+                                cutscene:wait(2)
+                                cutscene:textTagged("* ow.", "neutral_closed", "len")
+                                Assets.playSound("hurt")
+                                len:shake(5)
+                                
+                                cutscene:textTagged("* I... [wait:5]i really shouln't have... [wait:5]done that...", "nervous_closed_b", "len")
+
+                                -- Susie notices Len's damage
+                                susie:alert()
+                                cutscene:wait(0.4)
+                                cutscene:textTagged("* Oh crap, are you alright?[wait:5] here.", "surprise_frown", "susie")
+
+                                -- Susie walks up to Len
+                                cutscene:wait(cutscene:walkTo(susie, susie.x + 50, susie.y, 0.25, "right"))
+
+                                -- Susie heals em up
+                                susie:setAnimation("kneel_heal_alt_right")
+                                cutscene:wait(1)
+                                len:flash()
+                                Game.world:heal(lenParty, math.ceil(lenParty:getStat("health") * 0.7))
+                                cutscene:wait(1)
+                                len:resetSprite()
+                                len:setFacing("down")
+                                Assets.playSound("wing")
+                                cutscene:textTagged("* I feel... [wait:8]better? [wait:5]like better than better actually, [wait:5]i feel incredible!", "nervous", "len")
+                                susie:setSprite("away")
+                                Assets.playSound("wing")
+                                cutscene:textTagged("* Oh[wait:5] uh, [wait:5]thanks. i've been practicing...", "intense_smile", "susie")
+                                susie:setSprite("away_turn")
+                                cutscene:textTagged("* So, shall we keep moving then?", "neutral", "len")
+                                cutscene:textTagged("* Yeah, lets go.", "smile", "susie")
+                                susie:resetSprite()
+                                susie:setFacing("down")
+                                cutscene:textTagged("* Altough... [wait:5]uh... [wait:5]maybe try not dying on the way...", "nervous_smile", "susie")
+                                len:resetSprite()
+                            else
+                                -- Slide back a bit
+                                cutscene:slideTo(len, x, y + 40, 0.1)
+                                cutscene:wait(1.5)
+
+                                -- Worth it.
+                                cutscene:textTagged("* Worth it.", "happy", "len")
+                                -- len:resetSprite() -- I find it funnier if it doesn't reset the sprite lol
+                            end
+                        end
+                    end
                 end
                 cutscene:hideNametag()
-    
+
                 -- Reset Susie's sprite
                 susie:resetSprite()
-    
+
                 -- Reattach the camera
                 cutscene:attachCamera()
-    
+
                 -- Align the follower positions behind Kris's current position
                 cutscene:alignFollowers()
                 -- And reattach them, making them return to their target positions
@@ -184,7 +255,115 @@ local hub = {
         cutscene:setSpeaker(wallnpc)
         cutscene:text("* I Am the Wall Guardian.[wait:5]\n* This Wall is Off Limits for you\nno-good wall slammers.")
     end,
-	
+
+    len = function(cutscene)
+        local lenNpc = cutscene:getCharacter('len')
+        local lenParty = Game.world:getPartyCharacterInParty("len")
+
+        if lenParty then
+            cutscene:detachFollowers()
+            cutscene:walkTo(lenParty, 675, 534, 1, "left")
+            cutscene:walkTo(lenNpc, 590, 534, 1, "right")
+            cutscene:wait(1)
+            local rng = MathUtils.randomInt(1,11)
+            if rng ~= 1 then
+                cutscene:textTagged("* Woah,[wait:5] that's me?", "neutral", lenNpc)
+                cutscene:textTagged("* Yeah,[wait:5] im you.", "neutral_b", lenParty)
+                cutscene:textTagged("* Wait,[wait:5] but i am me!", "nervous", lenNpc)
+                cutscene:textTagged("* And i am you.", "nervous_closed_b", lenParty)
+            else
+                cutscene:wait(1)
+                local slipOff = Game:getFlag("lenSlippedLore")
+                if not slipOff then
+                    Game:setFlag("lenSlippedLore", true)
+                    cutscene:textTagged("[noskip]* Heh,[wait:5] you're like my copycat-", "neutral_b", lenParty, {auto = true})
+                    Assets.playSound("wing")
+                    lenNpc:setAnimation("scream/right")
+                    lenNpc:shake(5)
+                    cutscene:textTagged("* STOP!", "dumb", lenNpc)
+                    cutscene:textTagged("* YOU CAN'T SAY THAT!", "neutral_closed", lenNpc)
+                    lenNpc:resetSprite()
+                    cutscene:textTagged("* !", "suprise_b", lenParty)
+                    cutscene:textTagged("* Right,[wait:5] sorry.", "nervous_closed_b", lenParty)
+                else
+                    cutscene:textTagged("* Heh,[wait:5] you're like my...[wait:5][face:nervous_closed_b] clone.", "neutral", lenParty)
+                    cutscene:textTagged("* Im a copy,[wait:5] technically.", "neutral", lenNpc)
+                    cutscene:textTagged("* Can't you be both?", "neutral_b", lenParty)
+                    cutscene:textTagged("* A clone-copy?", "suprise", lenNpc)
+                    cutscene:textTagged("* A Clopy.", "happy_b", lenParty)
+                end
+            end
+
+            cutscene:walkTo(lenNpc, lenNpc.init_x, lenNpc.init_y, 0.4)
+            cutscene:attachFollowers()
+            cutscene:wait(1)
+            lenNpc:resetSprite()
+            lenNpc:setFacing("down")
+            return
+        end
+        
+        local susie = cutscene:getCharacter("susie")
+        cutscene:setSpeaker(lenNpc)
+
+        local met_len = Game:getFlag("lenMet")
+        if not met_len then
+            Game:setFlag("lenMet", true)
+
+            cutscene:textTagged("* Oh, [wait:5]Hello there!", "happy", lenNpc)
+            cutscene:textTagged("* My DLC isn't finished yet, [wait:5][face:happy]so you can have a free party member for now.", "neutral_closed", lenNpc)
+
+            if susie then
+                cutscene:textTagged("* Uh, what's a DLC?", "nervous_smile", "susie")
+                cutscene:textTagged("* Oh uh...[wait:5] don't worry about it.", "nervous", lenNpc)
+            end
+        end
+
+        local lenFirstJoin = Game:getFlag("lenFirstJoin", true)
+        local music = Game.world.music
+        if lenFirstJoin then
+            cutscene:textTagged("* So what do you say?", "neutral", lenNpc)
+            local c = cutscene:choicer({"Sure, join us!", "No thanks."})
+            if c == 2 then
+                cutscene:textTagged("* Okay then,[wait:5] i'll be here if you change your mind.", "neutral", lenNpc)
+                return
+            end
+
+            Game:setFlag("lenFirstJoin", false)
+            cutscene:textTagged("* Neat!", "happy", "len")
+
+            music:pause()
+            local music_inst = Music()
+            cutscene:after(function() music_inst:remove() end)
+
+            music_inst:play("deltarune/fanfare", 1, 1, false)
+            cutscene:text("[noskip][speed:0.1]* (Len has joined the party!)[wait:2]", nil, {auto = true, wait = false})
+            cutscene:wait(10)
+            music_inst:stop()
+        else
+            cutscene:textTagged("* Oh,[wait:5] hi there.", "neutral", lenNpc)
+            local c = cutscene:choicer({"Join us!", "Bye."})
+            if c == 2 then
+                cutscene:textTagged("* See ya.", "neutral", lenNpc)
+                return
+            end
+
+            cutscene:textTagged("* Sure,[wait:5] why not?", "neutral", "len")
+            music:pause()
+            Assets.playSound("charjoined")
+            cutscene:text("[noskip]* (Len has joined the party.)[wait:9]", nil, {auto = true, wait = false})
+            cutscene:wait(3)
+        end
+        
+        local lenParty = Game:getPartyMember("len")
+        table.insert(Game.party, lenParty)
+        local follower = Game.world:spawnFollower(lenParty:getActor(), { party = lenParty.id, x = lenNpc.x, y = lenNpc.y })
+        follower:setFacing("down")
+        lenNpc:remove()
+        cutscene:attachFollowers()
+        cutscene:wait(1)
+        music:resume()
+    end,
+
     nokia_dog = function(cutscene, event)
         local dog = cutscene:getCharacter("dog")
 
@@ -229,7 +408,7 @@ local hub = {
         cutscene:text("* I am this room's smith, [wait:5]MALIUS.")
         cutscene:text("* Using my skills, [wait:5]I can FUSE items to create NEW ONES.")
         cutscene:text("* Or I can REPAIR whatever broken items you possess.")
-	
+
         local choice = cutscene:choicer({"Fix Item", "Fuse", "Fix Us", "Leave"})
         if choice == 2 then
 
@@ -314,12 +493,27 @@ local hub = {
             item1 = "friend_buster",
             item2 = "justiceaxe"
         },
+        {
+            result = "bug",
+            item1 = "paper_hat",
+            item2 = "glitchswd"
+        },
+        {
+            result = "broken_bandana",
+            item1 = "bug",
+            item2 = "fluffy_bandana"
+        },
+        {
+            result = "flurrier_bandana",
+            item1 = "bin_weapon",
+            item2 = "broken_bandana"
+        },
     }
     Kristal.callEvent("setItemsList", items_list)
 
             cutscene:after(function()
                 Game.world:openMenu(FuseMenu())
-            end)	
+            end)
         elseif choice == 3 then
             local malius = cutscene:getCharacter("malius")
             cutscene:detachCamera()
@@ -339,7 +533,7 @@ local hub = {
             end
 
             for i, party in pairs(order) do
-                local id = party.actor.id 
+                local id = party.actor.id
 
                 local char = cutscene:getCharacter(id)
                 local x, y = char.x, char.y
@@ -370,7 +564,7 @@ local hub = {
                 malius:setAnimation("hit")
                 Assets.playSound("squeaky")
                 cutscene:wait(9/15)
-                
+
                 char:resetSprite()
 
                 char.x, char.y = x, y
@@ -489,12 +683,12 @@ local hub = {
         local track_names = {}
 
         for track_name, _ in pairs(music_assets) do
-            if not Utils.startsWith(track_name, "voiceover/") then
+            if not StringUtils.startsWith(track_name, "voiceover/") then
                 table.insert(track_names, track_name)
             end
         end
 
-        local random_theme = Music(Utils.pick(track_names), 0.8, 1)
+        local random_theme = Music(TableUtils.pick(track_names), 0.8, 1)
 
         cutscene:wait(0.4)
         fun_fax:setSprite("watching")
@@ -559,14 +753,14 @@ local hub = {
             {"* I am...", "* Indeed, I am..."},
         }
 
-        cutscene:text("[speed:0.5]" .. Utils.pick(dialogue_pairs)[1])
+        cutscene:text("[speed:0.5]" .. TableUtils.pick(dialogue_pairs)[1])
 
         fun_fax:setSprite("searching")
         cutscene:wait(1.5)
         fun_fax:setSprite("watching")
         cutscene:wait(1.5)
 
-        cutscene:text("[speed:0.5]" .. Utils.pick(dialogue_pairs)[2])
+        cutscene:text("[speed:0.5]" .. TableUtils.pick(dialogue_pairs)[2])
 
         cutscene:wait(3)
         fun_fax:setSprite("searching")
@@ -592,7 +786,7 @@ local hub = {
 
         local susieHasMetSans = Game:getFlag("susieHasMetSans", false)
         local dessHasMetSans = Game:getFlag("dessHasMetSans", false)
-		
+
 		if (not Game:getFlag("sansHint")) or (Game:getFlag("sansHint") and Game.world.player.facing ~= "right") then
             if cutscene:getCharacter("susie") and susieHasMetSans == false then
                 cutscene:textTagged("* YOU!?", "teeth_b", "susie")
@@ -796,7 +990,7 @@ local hub = {
                 cutscene:showNametag("sans.", {font = "sans"})
                 cutscene:text("[font:sans]* 'sup?", "neutral", "sans")
             end
-				
+
             local choice = cutscene:choicer({"Elevator", "How are\nyou here?", "Brother", "Nothing"})
 
             if choice == 1 then
@@ -883,7 +1077,7 @@ local hub = {
                     cutscene:wait(0.5)
                     sans:setFacing("left")
                     cutscene:wait(1)
-				
+
                     cutscene:textTagged("* ...", "neutral", "sans")
                     cutscene:textTagged("* ...well,[wait:5] would you look at that.", "eyes_closed", "sans")
 
@@ -919,7 +1113,7 @@ local hub = {
                 Assets.playSound("damage")
                 Assets.playSound("smash_homerun")
                 cutscene:shakeCamera(4)
-			
+
                 local flash = Rectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT)
                 flash.layer = 100
                 flash.color = { 1, 1, 1 }
@@ -930,20 +1124,20 @@ local hub = {
                 Game.world.timer:tween(1.5, flash, { alpha = 0 }, "linear", function()
                     flash:remove()
                 end)
-			
+
                 sans.physics.speed_x = 10
                 sans.physics.speed_y = -10
-			
+
                 cutscene:wait(2)
                 Assets.playSound("equip")
                 dess:setSprite("walk")
                 dess:setFacing("right")
                 cutscene:wait(1)
-			
+
                 cutscene:textTagged("* haha HELL YEAH I did it", "swag", "dess")
-		
+
                 music_cut:play("deltarune/fanfare")
-			
+
                 for i,_ in ipairs(Game.party) do
                     local chara = Game.party[i]
                     local actor = Game.world:getCharacter(chara.actor.id)
@@ -973,9 +1167,9 @@ local hub = {
                 dess:setFacing("up")
                 cutscene:wait(2.5)
                 cutscene:textTagged("* wait how the fu", "wtf", "dess", {auto = true})
-				
-                music_cut:play("deltarune/muscle")				
-				
+
+                music_cut:play("deltarune/muscle")
+
                 local you_kids = #Game.party > 1 and "you kids" or "you"
                 cutscene:textTagged("* heya.", "neutral", "sans")
                 cutscene:textTagged("* so,[wait:5] you won't believe what just happened.", "joking", "sans")
@@ -983,7 +1177,7 @@ local hub = {
                 cutscene:textTagged("* guess my work here is done.", "eyes_closed", "sans")
                 cutscene:textTagged(string.format("* so, %s won't be seeing me anytime soon.", you_kids), "joking", "sans")
                 cutscene:textTagged("* see ya.", "wink", "sans")
-				
+
                 music_cut:stop()
                 Game.world.fader:fadeOut(nil, {alpha = 1, speed = 10})
                 elevator.sprite_inside.visible = true
@@ -1021,7 +1215,7 @@ local hub = {
             if not cutscene:getCharacter("susie") then event:remove() cutscene:endCutscene() return end
             Game.world.music:fade(0, 1, function() Game.world.music:stop() end)
             sans.x = 462
-			
+
             local metalsonic_plush = Game.world:getEvent(82)
             local save = Game.world:getEvent(48)
             metalsonic_plush.visible = false
@@ -1193,10 +1387,10 @@ local hub = {
 
                     cutscene:slideTo(shadowguy2, shadowguy2.x, 355)
                     cutscene:wait(cutscene:slideTo(shadowguy1, shadowguy1.x, 355))
-				
+
                     cutscene:slideTo(shadowguy1, shadowguy1.x - 80, shadowguy1.y)
                     cutscene:wait(cutscene:slideTo(shadowguy2, shadowguy2.x + 80, shadowguy2.y))
-				
+
                     cutscene:slideTo(shadowguy2, shadowguy2.x, 600)
                     cutscene:wait(cutscene:slideTo(shadowguy1, shadowguy1.x, 600))
 
@@ -1242,7 +1436,7 @@ local hub = {
                 shadowguy2:play(1/4)
                 cutscene:textTagged("* Okay,[wait:5] here's what we gonna do.", nil, shadowguy2, { nametag = "Shadowguy 2" } )
                 cutscene:textTagged("* We're gonna leave your lil' skelefriend here be...", nil, shadowguy2, { nametag = "Shadowguy 2" } )
-				
+
                 local leader_surnames = {
                     hero = "human",
                     kris = "blue person",
@@ -1284,10 +1478,10 @@ local hub = {
 
                 cutscene:slideTo(shadowguy2, shadowguy2.x, 355)
                 cutscene:wait(cutscene:slideTo(shadowguy1, shadowguy1.x, 355))
-				
+
                 cutscene:slideTo(shadowguy1, shadowguy1.x - 80, shadowguy1.y)
                 cutscene:wait(cutscene:slideTo(shadowguy2, shadowguy2.x + 80, shadowguy2.y))
-				
+
                 cutscene:slideTo(shadowguy2, shadowguy2.x, 600)
                 cutscene:wait(cutscene:slideTo(shadowguy1, shadowguy1.x, 600))
 
@@ -1466,14 +1660,14 @@ local hub = {
 
     warp_bin_note = function(cutscene, event)
         local dess = cutscene:getCharacter("dess")
-	
+
         cutscene:text("* HOW TO USE THE WARP BIN\n* A two-step guide to all your dumpster-traveling needs.")
         cutscene:text("* STEP 1:\nEnter a valid code on the keypad beneath the bin's lid.")
         cutscene:text("* STEP 2:\nHappy traveling!")
         cutscene:text("* (NOTICE: If you ever get lost or run out of codes to input, type FLOORONE get back here.)")
         cutscene:text("* (Management is also not responsible for any odors emitting from the bin.)")
         cutscene:text("* (This is due to a certain public menace throwing cans of Mug Root Beer into it.)")
-		
+
         if dess then
             cutscene:textTagged("* gee, I wonder who that could be", "condescending", dess)
         end
@@ -1494,7 +1688,7 @@ local hub = {
         local function waitForTimeOrUserCancellation(time)
             cust_wait_timer = time
             return function()
-                cust_wait_timer = Utils.approach(cust_wait_timer, 0, DT)
+                cust_wait_timer = MathUtils.approach(cust_wait_timer, 0, DT)
                 if morshu.interact_count > 1 and Input.pressed("cancel") then
                     cust_wait_timer = 0
                     return true
@@ -1518,10 +1712,11 @@ local hub = {
         cutscene:after(function()
             music_inst:remove()
         end)
+        music_inst:setLooping(false)
         local function showMorshuAnimWithVoc(anim, clip, time, disallow_cancel)
             local rem = showMorshuAnim(anim)
             Game.world.music:pause()
-            music_inst:play(clip, 1, 1, false)
+            music_inst:play(clip, 1, 1)
             rem(time, disallow_cancel)
             music_inst:stop()
             Game.world.music:resume()
@@ -1581,7 +1776,7 @@ local hub = {
 
         cutscene:text("* (You stashed the Lamp Oil inside your [color:yellow]ITEMS[color:reset].)")
     end,
-    
+
     magshop = function(cutscene, event)
         local menu = {
             {
@@ -1722,27 +1917,27 @@ local hub = {
             onPurchaseComplete(item.post_purchase)
         end
     end,
-	
+
     sansshop = function(cutscene, event) -- note: currently unfinished
         local sans = cutscene:getCharacter("sans")
-		
+
         local function onDeclinedOffer()
             cutscene:textTagged("* don't you know a \ngood deal when you \nhear one?", "joking", "sans")
         end
-		 
+
         cutscene:textTagged("* heya.", "neutral", "sans")
         cutscene:textTagged("* i decided to try selling some goods in this marketplace.", "look_left", "sans")
         cutscene:textTagged("* anything you want?", "neutral", "sans")
-		
+
         local choice = cutscene:choicer({ "Food", "Nevermind" })
-		
+
         if choice == 1 then
             cutscene:textTagged("* i'm currently selling some fried snow for 5G...", "joking", "sans")
             cutscene:textTagged("* and some hot dogs,\n[wait:5] 30G for each one.", "neutral", "sans")
             cutscene:textTagged("* which one will it be?", "wink", "sans")
-			
+
             local choice = cutscene:choicer({ "Hot Dog", "Fried Snow" })
-			
+
             if choice == 1 then
                 cutscene:showShop()
                 cutscene:textTagged("* cool.\n[wait:5]* that'll be 30G.", "neutral", "sans")
@@ -1808,7 +2003,7 @@ local hub = {
     lemonade = function(cutscene, event)
         local lemonade_stand = cutscene:getCharacter("lemonade_stand")
 		cutscene:setSpeaker(lemonade_stand)
-		
+
         local function onPurchase()
 		    cutscene:playSound("locker")
             cutscene:textTagged("* Here you go!\n* Some of my finest lemonade.")
@@ -1829,17 +2024,17 @@ local hub = {
             cutscene:textTagged("* Hold on there.[wait:5]\n* Your inventory's looking pretty packed right now.")
             cutscene:textTagged("* Try clearing sone of that stuff out first, before I can give you a glass.")
         end
-		
+
 		cutscene:textTagged("* Hey there!\n* I'm selling some lemonade.")
 		cutscene:textTagged("* It's cold,[wait:5] it's fresh,[wait:5] and \nit's all home-made!")
 		cutscene:textTagged("* Can I get you a glass?")
 		cutscene:setSpeaker(nil)
 		cutscene:text("* (Buy Lemonade for 60 D$?)")
-		
+
 		cutscene:showShop()
         local choice = cutscene:choicer({ "Buy", "Do Not" })
 		cutscene:hideShop()
-		
+
         if choice == 2 then
             cutscene:setSpeaker(lemonade_stand)
             onDeclined()
@@ -1855,7 +2050,7 @@ local hub = {
             onInventoryFull()
             return
 		end
-		
+
         Game.money = Game.money - 60
 		cutscene:setSpeaker(lemonade_stand)
         onPurchase()
@@ -1864,9 +2059,9 @@ local hub = {
     handyshop = function(cutscene, event)
 		cutscene:textTagged("* (You can't tell what it's trying to sell, but you feel bad about it.)")
 		cutscene:textTagged("* (Should you buy it for 20 D$?)")
-		
+
         local choice = cutscene:choicer({ "Buy", "Do Not" })
-		
+
         if choice == 2 then
             cutscene:textTagged("* (For a weird reason, you felt bitter.)")
             return
@@ -1879,7 +2074,7 @@ local hub = {
             cutscene:textTagged("* (You don't have enough inventory space to buy it.)")
             return
 		end
-		
+
         Game.money = Game.money - 20
         cutscene:playSound("locker")
         cutscene:textTagged("* (Suddenly,[wait:5] a weird monochrome hat entered your [color:yellow]ARMORs[color:reset].)")
@@ -1962,10 +2157,11 @@ local hub = {
         Game.world.music:pause()
         local music_inst = Music()
         cutscene:after(function() music_inst:remove() end)
+        music_inst:setLooping(false)
 
         if event.interact_count == 1 then
             cutscene:showNametag("Trash Rudinn")
-            music_inst:play("voiceover/garbage", 1, 1, false)
+            music_inst:play("voiceover/garbage", 1, 1)
             cutscene:text("[noskip][voice:none]* Hellooo...[wait:1.5]", nil, garbage, { auto = true })
             cutscene:hideNametag()
             genBigText("I'm", 240, 40)
@@ -1977,7 +2173,7 @@ local hub = {
             fadeOutBigText()
         else
             cutscene:showNametag("Trash Rudinn")
-            music_inst:play("voiceover/stillgarbage", 1, 1, false)
+            music_inst:play("voiceover/stillgarbage", 1, 1)
             cutscene:text("[noskip][voice:none]* Oh hi,[wait:1] thanks for checking in.[wait:2]\n* I'm...", nil, garbage, { auto = true })
             cutscene:hideNametag()
             genBigText("still", 210, 40)
@@ -2027,7 +2223,7 @@ local hub = {
                         cutscene:walkTo(Game.world.player, Game.world.player.x, Game.world.player.y - 40, 1, "down", true)
                         cutscene:wait(cutscene:walkTo(susie, Game.world.player.x, Game.world.player.y, 1, facing))
                     end
-				
+
                     cutscene:textTagged("* If you have a problem\nwith us,[wait:5] then we have\na problem with you.", "smirk", "susie")
                     cutscene:textTagged("* Do you know what we do\nwith problems?", "smirk", "susie")
                     cutscene:textTagged("* We stomp.[wait:10] Them.[wait:10] Into.[wait:10]\nThe.[wait:10] Ground.", "smile", "susie")
@@ -2075,7 +2271,7 @@ local hub = {
             local defeated_enemies = encounter:getDefeatedEnemies()
 
             local done_state = defeated_enemies[1].done_state
-			
+
             if done_state == "KILLED" or done_state == "FROZEN" then
                 if not Game:isDessMode() then
                     susie:resetSprite()
@@ -2090,7 +2286,7 @@ local hub = {
                     end
                 else
                     cutscene:textTagged("*YEAHHHHHH I fuckin did it", "swag", "dess")
-					
+
                     Assets.playSound("boost")
                     local dess_party = Game:getPartyMember("dess")
                     dess_party:increaseStat("health", 25)
@@ -2108,12 +2304,12 @@ local hub = {
                 if susie then
                     susie:resetSprite()
                 end
-				
+
                 local good_star = cutscene:spawnNPC("ostarwalker", star.x, star.y)
                 Game.world.music:resume()
 
                 cutscene:textTagged("* I changed my    [color:yellow]mind[color:reset]", nil, "ostarwalker")
-				
+
                 local guys = #Game.party > 1 and "You guys" or "You"
                 cutscene:textTagged(string.format("* %s are actually pretty [color:yellow]cool[color:reset].", guys), nil, "ostarwalker")
 
@@ -2152,16 +2348,16 @@ local hub = {
                     Game.world.timer:tween(1, alpha, { alpha = 0 })
                     Assets.playSound("hypnosis")
                     cutscene:wait(4)
-					
+
                     Game.world.timer:tween(0.5, alpha, { alpha = 1 })
                     Assets.playSound("hypnosis", 1, 1.5)
-					
+
                     cutscene:wait(1)
 
                     cutscene:textTagged("* Oh wait actually", nil, "ostarwalker")
                     cutscene:textTagged("* Since you defeated    [color:yellow]me[color:reset]", nil, "ostarwalker")
                     cutscene:textTagged("* I'll give you [color:yellow]this[color:reset]", nil, "ostarwalker")
-					
+
                     Assets.playSound("boost")
                     local dess_party = Game:getPartyMember("dess")
                     dess_party:increaseStat("health", 25)
@@ -2169,7 +2365,7 @@ local hub = {
                     dess_party:increaseStat("defense", 1)
                     dess_party:increaseStat("magic", 1)
                     cutscene:text("* (Dess became stronger!)")
-					
+
                     cutscene:textTagged("* ...A free stat boost?", "wtf", "dess")
                     cutscene:textTagged("* and I DON'T have to kill anyone for it??", "doom_AURGHHHHHH", "dess")
                     cutscene:textTagged("*            Yes", nil, "ostarwalker")
@@ -2180,7 +2376,7 @@ local hub = {
                     cutscene:textTagged("* You're    [color:yellow]welcome[color:reset]", nil, "ostarwalker")
                     cutscene:textTagged("* I'm [color:yellow]going[color:reset] now", nil, "ostarwalker")
                     cutscene:textTagged("* Bye", nil, "ostarwalker")
-					
+
                     local alpha = good_star:addFX(AlphaFX())
                     Game.world.timer:tween(1, alpha, { alpha = 0 })
                     Assets.playSound("hypnosis")
@@ -2191,12 +2387,12 @@ local hub = {
                     Game:addPartyMember("ostarwalker")
                     Game:unlockPartyMember("ostarwalker")
                     good_star:convertToFollower()
-				
+
 					Game.world.music:pause()
                     local party_jingle = Music("deltarune/charjoined")
                     party_jingle:play()
-                    party_jingle.source:setLooping(false)
-                    
+                    party_jingle:setLooping(false)
+
                     cutscene:text("[noskip]* [color:yellow]Starwalker[color:reset] joined the party.")
 					Game.world.music:resume()
                     party_jingle:remove()
@@ -2215,9 +2411,9 @@ local hub = {
         if not Game:isDessMode() then
             cutscene:text("* (It appears some kind of legend is written here...)")
             cutscene:text("* (Read it?)")
-			
+
             local choicer = cutscene:choicer({"Read", "Do not"})
-			
+
             if choicer == 1 then
                 cutscene:text("* (You attempted to read the legend transcribed on the plaque...)")
                 cutscene:text("* ([speed:0.5]...[wait:10][speed:1]but it was so utterly incomprehensible that it made your head spin.)")
@@ -2265,18 +2461,18 @@ local hub = {
             beam_of_death:setOrigin(0.5, 0)
 			Game.world:addChild(beam_of_death)
             Game.world.timer:tween(0.1, beam_of_death, { scale_x = 60})
-			
+
             Game.world.timer:tween(0.25, diagonal_mario, { color = {0, 0, 0} })
-			
+
             diagonal_mario:setScaleOrigin(0.5, 1)
             Game.world.timer:tween(1, diagonal_mario, { scale_x = 4, scale_y = 0 })
-			
+
             cutscene:wait(2)
             Game.world.timer:tween(0.1, beam_of_death, { scale_x = 0})
             cutscene:wait(0.1)
             diagonal_mario:remove()
             beam_of_death:remove()
-			
+
             cutscene:wait(2)
             cutscene:textTagged("* no copyright law in the universe can stop me", "condescending", "dess")
             Game:setFlag("diagonalMarioKilled", true)
@@ -2300,7 +2496,7 @@ local hub = {
     missinfo = function(cutscene, event)
         cutscene:text("* YOU,[wait:5] looks like you're in the need of some,[wait:5] MISSINFORMATION!", nil, "miss_info")
     end,
-	
+
     vending = function(cutscene, event)
         cutscene:text("* (DARK DOLLARS to BADGES!)\n* (Use the vending machine?)", nil)
         local choicer = cutscene:choicer({"Buy", "Don't Buy"})
@@ -2308,5 +2504,323 @@ local hub = {
 			Game:enterShop("hub_vending")
 		end
 	end,
+
+    ---@param cutscene WorldCutscene
+    ---@param npc NPC
+    silver = function(cutscene, npc)
+        local flag = Game:getFlag("hub_silver_npc_progress", 0)
+        if (flag == 0) then
+            cutscene:showNametag("???")
+            if (Game.playtime <= 1560) then
+                cutscene:text("* ...[wait:5]Hi.[wait:5] Are you new here?\n[wait:5]* Me too.", "neutral", npc)
+            else
+                cutscene:text("* ...[wait:5]Hi.\n[wait:5]* I'm new here.", "neutral", npc)
+            end
+            cutscene:hideNametag()
+            cutscene:textTagged("* Name's Silver.[wait:5] Moved from a cave to a tower.[wait:5] My mother's very proud.", "neutral_side", npc)
+
+            cutscene:textTagged("* I'm still trying to find things to decorate my room with.", "neutral_side", npc)
+            cutscene:textTagged("* Hm...\n[wait:5][face:neutral]* Can I tell you a secret?", "neutral_side", npc)
+            cutscene:textTagged("* ...[wait:5]I really love plushies.", "blush_side", npc)
+            cutscene:textTagged("* They're so soft and cute,[wait:2] I can't handle myself.", "blush_side", npc)
+            cutscene:textTagged("* ...[wait:5]If you happen to find a plushie or two,[wait:2] please bring them to me.", "neutral", npc)
+            cutscene:textTagged("* I...[wait:5] WILL allow you to play with them,[wait:2] of course...[wait:5] maybe.", "blush_side", npc)
+            Game:getQuest("plushies_for_silver"):unlock()
+            Game:setFlag("hub_silver_npc_progress", 1)
+        else
+            local have_any_plushies = false
+            for k, v in pairs(Game:getQuest("plushies_for_silver").plush_flags) do
+                if (v() == true) then have_any_plushies = true break end
+            end
+            if (have_any_plushies and flag == 1) then
+                cutscene:textTagged("* Oh,[wait:2] oh,[wait:2] what is this??", "excited", npc)
+                cutscene:textTagged("* I see.[wait:5] You've come to possess a sacred artifact.", "neutral_side", npc)
+                cutscene:textTagged("* Then,[wait:5] let me put it in its rightful place...", "smile_side", npc)
+                npc:setAnimation("diagright_up")
+
+                npc:walkTo(npc.x, npc.y - 20, 0.2, nil, true, nil, function ()
+                    npc:fadeOutAndRemove(0.5)
+                end)
+                cutscene:wait(0.75)
+                Game:setFlag("hub_silver_npc_progress", 2)
+            else
+                cutscene:textTagged("* Come back when you're a little...[wait:5] plushier.", "smile_side", npc)
+            end
+        end
+    end,
+
+    ---@param cutscene WorldCutscene
+    ---@param npc NPC
+    silverroom_intro = function(cutscene, npc)
+        cutscene:detachFollowers()
+        cutscene:look(Game.world.player, "up")
+        cutscene:alignFollowers("up", nil, nil, 40)
+        cutscene:attachFollowersImmediate()
+
+        local silver = cutscene:getCharacter("silver")
+        silver:setPosition(440, 314)
+        silver:setAnimation("diagright_up")
+
+        local pointx = silver.x
+        local pointy = silver.y - silver.height*2 - 40
+
+        local effect = Game.world:addChild(SilverMagicEffect(pointx, pointy, 30))
+        effect.layer = WORLD_LAYERS["above_soul"]
+
+        local init_sound = Assets.playSound("snowgrave", 0.5, 2)
+
+        local levitate_plushies = true
+        local function lev()
+            effect.width = effect.width + effect.counter / 6
+            effect.height = effect.height + effect.counter / 6
+
+            if (init_sound:tell() > 0.68) then
+                init_sound:seek(0.1)
+            end
+            if (not levitate_plushies) then return false end
+            for _, plush in ipairs(Game.world.map:getEvents("plush")) do ---@param plush PickupPlush
+                if (not plush:isRemoved()) then
+                    plush.x = pointx
+                    plush.y = pointy + 20 + math.sin(effect.counter * 10) * 3
+                end
+            end
+        end
+        lev()
+        cutscene:during(lev)
+
+        cutscene:wait(2)
+
+        effect.graphics.grow = -0.3
+        effect.graphics.remove_shrunk = true
+        levitate_plushies = false
+        init_sound:stop()
+
+        local time = 0
+        local plush_trails = true
+        local function trails()
+            if (not plush_trails) then return false end
+            time = time + 1 * DT
+            if (time > 1/20) then
+                time = 0
+                for _, plush in ipairs(Game.world.map:getEvents("plush")) do ---@param plush PickupPlush
+                    if (not plush:isRemoved()) then
+                    local star = Game.world:addChild(Sprite("world/events/shine", plush.x, plush.y))
+                    star:play(1/6, true)
+                    star:setOrigin(0.5)
+                    star.layer = plush.layer - 0.1
+                    star:setScale(4)
+                    star.graphics.grow = -0.2
+                    star.graphics.remove_shrunk = true
+                    end
+                end
+            end
+        end
+        cutscene:during(trails)
+
+        Assets.playSound("magicsprinkle")
+
+        for _, plush in ipairs(Game.world.map:getEvents("plush")) do ---@param plush PickupPlush
+            if (not plush:isRemoved()) then
+                plush:flash()
+                Game.world.timer:tween(1.0, plush, { x = plush.original_x, y = plush.original_y }, "out-expo")
+            end
+        end
+        cutscene:wait(1)
+        plush_trails = false
+
+        cutscene:wait(0.5)
+        silver:setAnimation("diagleft_down")
+
+        local b = false
+        silver:walkToSpeed(486, 314, 8, nil, true, function() b = true end)
+        cutscene:wait(function() return b end)
+        b = false
+        silver:walkToSpeed(486, 390, 8, nil, true, function() b = true end)
+        cutscene:wait(function() return b end)
+
+        cutscene:textTagged("* Look![wait:5] Doesn't it look so cute up there?", "excited", silver)
+        cutscene:textTagged("* The more I have,[wait:2] the better!\n[wait:5]* Mwehehe...!", "devious", silver)
+
+        silver:walkPath({{440, 280}, {160, 280}}, { keep_facing = true, time = 2 })
+
+        Game:setFlag("hub_silver_npc_progress", 3)
+    end,
+
+    ---@param cutscene WorldCutscene
+    silverroom_check = function(cutscene)
+        local player = Game.world.player
+        local silver = cutscene:getCharacter("silver")
+        -- silver:setAnimation("diagright_up")
+        local plushies = TableUtils.copy(player.holding)
+        for _, plush in ipairs(plushies) do ---@param plush PickupPlush
+            if (not plush:isRemoved()) then
+                plush:place()
+                plush.old_layer = plush.layer
+                plush.layer = plush.layer + 1
+            end
+        end
+
+        local pointx = plushies[1].x
+        local pointy = plushies[1].y
+
+        local effect = Game.world:addChild(SilverMagicEffect(pointx, pointy - 20, 30))
+        effect.layer = WORLD_LAYERS["above_soul"]
+
+        local init_sound = Assets.playSound("snowgrave", 0.5, 2)
+
+        local levitate_plushies = true
+        local function lev()
+            effect.width = effect.width + effect.counter / 6
+            effect.height = effect.height + effect.counter / 6
+
+            if (init_sound:tell() > 0.68) then
+                init_sound:seek(0.1)
+            end
+            if (not levitate_plushies) then return false end
+            for _, plush in ipairs(plushies) do ---@param plush PickupPlush
+                if (not plush:isRemoved()) then
+                    plush.x = MathUtils.lerp(plush.x, pointx, DT * 3)
+                    plush.y = MathUtils.lerp(plush.y, pointy, DT * 3) + math.sin(effect.counter * 10) * 1
+                end
+            end
+        end
+        lev()
+        cutscene:during(lev)
+
+        cutscene:wait(1)
+
+        effect.graphics.grow = -0.3
+        effect.graphics.remove_shrunk = true
+        levitate_plushies = false
+        init_sound:stop()
+
+        local time = 0
+        local plush_trails = true
+        local function trails()
+            if (not plush_trails) then return false end
+            time = time + 1 * DT
+            if (time > 1/20) then
+                time = 0
+                for _, plush in ipairs(plushies) do ---@param plush PickupPlush
+                    if (not plush:isRemoved()) then
+                    local star = Game.world:addChild(Sprite("world/events/shine", plush.x, plush.y))
+                    star:play(1/6, true)
+                    star:setOrigin(0.5)
+                    star.layer = plush.layer - 0.1
+                    star:setScale(4)
+                    star.graphics.grow = -0.2
+                    star.graphics.remove_shrunk = true
+                    end
+                end
+            end
+        end
+        cutscene:during(trails)
+
+        Assets.playSound("magicsprinkle")
+
+        for _, plush in ipairs(plushies) do ---@param plush PickupPlush
+            plush.layer = plush.layer - 1
+            if (not plush:isRemoved()) then
+                plush.layer = plush.old_layer or (plush.layer - 1)
+                plush:flash()
+                if (Game.world.map.placeOnShelf) then Game.world.map:placeOnShelf(plush) end
+                Game.world.timer:tween(1.0, plush, { x = plush.original_x, y = plush.original_y }, "out-expo")
+            end
+        end
+        cutscene:wait(1)
+        plush_trails = false
+    end,
+
+    ---@param cutscene WorldCutscene
+    ---@param npc NPC
+    silverroom = function(cutscene, npc)
+        cutscene:textTagged("* What's up?", "smile_eyesclosed", npc)
+
+        local choice = cutscene:choicer({"Tower", "Plushies", "You", "Nothing"})
+        if (choice == 1) then
+            cutscene:textTagged("* It's a nice place.\n[wait:5]* Very cozy.", "smile", npc)
+            cutscene:textTagged("* I thought,[wait:2] maybe people won't accept me here.", "neutral_side", npc)
+            cutscene:textTagged("* Because,[wait:2] y'know...", "sad_side", npc)
+            cutscene:textTagged("* I look like something from [font:special_mono]fhtving[font:reset] nightmares.", "sad", npc)
+            cutscene:textTagged("* Parents used to scare their misbehaving children with me.", "sad", npc)
+            cutscene:textTagged("* Just because I am...[wait:5] like this.", "sad_side", npc)
+            cutscene:textTagged("* But here...[wait:5] It's almost as if that never happened.", "sad", npc)
+            cutscene:textTagged("* In this place,[wait:2] it doesn't matter what happened before...", "sad_smile", npc)
+            cutscene:textTagged("* ...[wait:5]or what will happen after.", "sad_smile", npc)
+            cutscene:textTagged("* So...[wait:5] even if only for just a moment...[wait:5] you should have fun here.", "smile_side", npc)
+            cutscene:textTagged("* Forget about all [font:special_mono]bhnnzui[font:reset] happening outside and play a game or two.", "smile_eyesclosed", npc)
+            cutscene:textTagged("* I will always welcome you as my guests.", "smile_eyesclosed", npc)
+        elseif (choice == 2) then
+            cutscene:textTagged("* Yeah,[wait:2] I like cute things a lot.\n[wait:5]* Don't you?", "smile", npc)
+            choice = cutscene:choicer({"I Like", "I Don't Like"})
+            if (choice == 1) then
+                cutscene:textTagged("* See,[wait:2] we understand each other.", "smile_eyesclosed", npc)
+                cutscene:textTagged("* This is a normal interaction in this society.", "smile_eyesclosed", npc)
+            else
+                cutscene:textTagged("* Heh,[wait:2] as if that's true.", "smile", npc)
+                cutscene:textTagged("* You wouldn't collect them if you didn't like them.", "smile_eyesclosed", npc)
+            end
+        elseif (choice == 3) then
+            local f = Game:getFlag("hub_silver_npc_topic3", 0)
+            if (f == 0) then
+                cutscene:textTagged("* Me...?", "shock", npc)
+                cutscene:textTagged("* I was...[wait:5] different,[wait:2] before.", "sad_smile", npc)
+                cutscene:textTagged("* Before the,[wait:5] uh...\n[wait:5]before [font:special_mono]dvoddptd smf yjtrsfd.[font:reset]", "sad_side", npc)
+                cutscene:textTagged("* They just wanted to create.[wait:5] I understand.", "sad", npc)
+                cutscene:textTagged("* They did their best and I don't blame them.", "sad", npc)
+                cutscene:textTagged("* Even if pieces don't fit together,[wait:5] you may get a nice picture.", "sad_side", npc)
+                cutscene:textTagged("* That's what I believe.", "sad_side", npc)
+                cutscene:textTagged("* I'm...[wait:5] not sure that's the case here,[wait:5] though.", "sad_side", npc)
+                cutscene:textTagged("* I always wished that my body was different.", "sad_side", npc)
+                cutscene:textTagged("* Wished that all of this didn't happen to me.", "sad_side", npc)
+                cutscene:textTagged("* It feels like a curse that you can never get rid of.", "sad_side", npc)
+                cutscene:textTagged("* But,[wait:5] I suppose,[wait:5] this is just something I'll have to accept...", "sad_smile", npc)
+                choice = cutscene:choicer({"You don't\nhave to\naccept it", "Yes.\nIt's fine"})
+                if (choice == 1) then
+                    cutscene:textTagged("* You think so...?", "shock", npc)
+                    cutscene:textTagged("* I...[wait:5] don't even know what I can do,[wait:5] but...", "neutral", npc)
+                    cutscene:textTagged("* You sound...[wait:5] very confident.", "smile", npc)
+                    cutscene:textTagged("* I should be as confident as you!\n[wait:5]* Thank you!", "smile_eyesclosed", npc)
+                    cutscene:textTagged("* Figuring it out might take some time,[wait:5] but...[wait:5] I'm sure it's worth it!", "smile_eyesclosed", npc)
+                    cutscene:textTagged("* Maybe I should draw what I'd want to look like?", "smile_side", npc)
+                    cutscene:textTagged("* Or should I...[wait:5] make my current body feel better to reside in?", "smile_side", npc)
+                    cutscene:textTagged("* Not that I'm a ghost or something,[wait:5] haha!", "smile_eyesclosed", npc)
+                    Game:setFlag("hub_silver_npc_topic3", 1)
+                else
+                    cutscene:textTagged("* Y-yeah![wait:5] I don't even need to like my body!", "sad_smile", npc)
+                    cutscene:textTagged("* It's fine.[wait:5] I don't care at all.", "sad_smile", npc)
+                    cutscene:textTagged("* I'll just ignore it and it will go away.", "smile_eyesclosed", npc)
+                    cutscene:textTagged("* Thank you![wait:5] Now I'm confident in myself!!", "smile_eyesclosed", npc)
+                    Game:setFlag("hub_silver_npc_topic3", 2)
+                end
+            elseif (f == 1) then
+                if (npc.interact_count == 1) then
+                    cutscene:textTagged("* I'm still thinking of who I am!!\n[wait:5]* It's difficult to figure,[wait:5] you know?", "smile_eyesclosed", npc)
+                else
+                    cutscene:textTagged("* I'm still thinking!!", "smile_eyesclosed", npc)
+                end
+            elseif (f == 2) then
+                cutscene:textTagged("* I'm fine.", "smile_eyesclosed", npc)
+            end
+        elseif (choice == 4) then
+            cutscene:textTagged("* See ya.", "smile_eyesclosed", npc)
+        end
+    end,
+
+    ---@param cutscene WorldCutscene
+    ---@param event Interactable
+    silverroom_rock = function(cutscene, event)
+        if (Game.world.player.holding and #Game.world.player.holding > 0) then
+            if (event.interact_count <= 3) then
+                cutscene:text("* [wait:10].[wait:10].[wait:10].[wait:20] taken.")
+            else
+                cutscene:text("* [shake:"..(math.min(event.interact_count-2, 5)).."]What do you not understand.[shake:0]")
+            end
+        else
+            cutscene:text("* A rock is sitting on the chair.")
+            event.interact_count = 0
+        end
+    end,
 }
+
 return hub

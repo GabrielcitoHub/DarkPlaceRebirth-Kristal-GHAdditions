@@ -34,6 +34,10 @@ end
 
 function spell:onCast(user, target)
 	local damage = math.floor((((user.chara:getStat("attack") * 4)) - 3 * target.defense))
+    
+    if (Game.battle and Game.battle.headwind > 0) then
+        damage = math.floor(damage * 1.25)
+    end
 
 	local function generateSlash(scale_x)
 		local cutAnim = Sprite("effects/attack/sling")
@@ -95,6 +99,10 @@ end
 
 function spell:onLightCast(user, target)
 	local damage = math.floor((((user.chara:getStat("attack") * 4)) - 3 * target.defense))
+    
+    if (Game.battle and Game.battle.headwind > 0) then
+        damage = math.floor(damage * 1.25)
+    end
 
 	local function generateSlash(scale_x)
 		local cutAnim = Sprite("effects/attack/sling")

@@ -15,7 +15,11 @@ function character:init()
     self.love = 1
     self.level = self.love
     -- Default title / class (saved to the save file)
-    self.title = "Snowcaster\nMight be able to\nuse some cool moves."
+    if Game.chapter <= 4 then
+        self.title = "Snowcaster\nMight be able to\nuse some cool moves."
+    elseif Game.chapter >= 5 then
+        self.title = "Mistletoe\nThings got\nserious today."
+    end
 
     -- Determines which character the soul comes from (higher number = higher priority)
     self.soul_priority = 1

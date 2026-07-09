@@ -198,14 +198,13 @@ function OverworldActionBox:draw()
 		Draw.setColor(1, 1, 1, self.reaction_alpha / 6)
 		love.graphics.printf(self.reaction_text, 5, 43, 146*2, "left", 0, 0.5, 0.5)
 	else
-		love.graphics.setLineWidth(2)
-		love.graphics.line(0, 1, 213, 1)
-		
-		if Game:getConfig("oldUIPositions") then
-			love.graphics.line(0, 2, 2, 2)
-			love.graphics.line(211, 2, 213, 2)
-		end
+        love.graphics.setLineWidth(2)
+        love.graphics.line(0, 1, 213, 1)
 
+        if Game:getConfig("oldUIPositions") then
+            love.graphics.line(0, 2, 2, 2)
+            love.graphics.line(211, 2, 213, 2)
+        end
         if self.chara:usesMana() then
             self.hp_sprite.x = 107
             self.hp_sprite.y = 10

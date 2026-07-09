@@ -42,6 +42,11 @@ function spell:onCast(user, target)
 		Game.battle.starbasic:slideToSpeed(targetX, targetY, 20, function()
 			local mult = Game:getElementMult("STAR")
 			local damage = math.ceil((((user.chara:getStat("magic") * 20) + 100 + (MathUtils.random(10) * 2)) * mult)/target:getResistance("STAR"))
+    
+            if (Game.battle and Game.battle.headwind > 0) then
+                damage = math.floor(damage * 1.25)
+            end
+            
 			target:hurt(damage, user)
 
 			Assets.playSound("celestial_hit")
@@ -87,6 +92,11 @@ function spell:onLightCast(user, target)
 		Game.battle:addChild(Game.battle.starbasic)
 		Game.battle.starbasic:slideToSpeed(tx, ty, 20, function()
 			local damage = math.ceil((user.chara:getStat("magic") * 2) + 50 + (MathUtils.random(5) * 2))
+    
+            if (Game.battle and Game.battle.headwind > 0) then
+                damage = math.floor(damage * 1.25)
+            end
+            
 			target:hurt(damage, user)
 
 			Assets.playSound("celestial_hit")
