@@ -411,6 +411,10 @@ function Map:shouldLoadObject(data, layer)
     return self.reader:call("shouldLoadObject", data, layer)
 end
 
+function Map:getObjectType(data)
+    return self.reader:call("getObjectType", data)
+end
+
 function Map:loadObjects(layer, depth, layer_type)
     return self.reader:call("loadObjects", layer, depth, layer_type)
 end
@@ -428,7 +432,8 @@ end
 
 --- Load an object by its name.
 ---@param name string The name of the object to load.
----@param data table The Tiled object data for the object.
+---@param data table The serialized object data for the object.
+---@param context? table Format-specific loading context.
 ---@return Event? The loaded object, or `nil` if none was found.
 function Map:loadObject(name, data)
 
@@ -468,8 +473,8 @@ function Map:loadObject(name, data)
     Logging.warn("No event with ID '" .. tostring(name) .. "' found")
 end
 
-function Map:loadController(name, data)
-    return self.reader:call("loadController", name, data)
+function Map:loadController(name, data, context)
+    return self.reader:call("loadController", name, data, context)
 end
 
 function Map:populateTilesets(data)

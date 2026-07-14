@@ -92,9 +92,6 @@ function Game:enter(previous_state, save_id, save_name, fade)
     self.quick_save = nil
 
     self.event_registry = EventRegistry()
-    self.builtin_event_registry = EventRegistry()
-
-    self:registerBuiltInEvents()
 
     Kristal.callEvent(KRISTAL_EVENT.init)
 
@@ -134,10 +131,16 @@ function Game:enter(previous_state, save_id, save_name, fade)
     end
 end
 
---- Register a new event class with the given ID.
----@param id string                    The ID of the event.
----@param constructor fun(data):Event  A constructor function that takes event data and returns an event instance.
+--- Registers a fallback runtime constructor for a mod event which has no EditorEvent.
+---@param id string
+---@param constructor fun(data: table):Object
+---@return boolean registered
 function Game:registerEvent(id, constructor)
+    if Registry.getEditorEvent(id) then
+        Kristal.Console:warn("Ignoring fallback event '" .. id
+            .. "' because an EditorEvent is already registered for that type")
+        return false
+    end
     self.event_registry:register(id, constructor)
 end
 
