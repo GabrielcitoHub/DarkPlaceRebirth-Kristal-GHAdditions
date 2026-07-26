@@ -62,7 +62,7 @@ function item:init()
         noel = "Eat Lead!",
         ceroba = "The heck do I do with that?",
         hero = "Free cash.",
-        len = "Time to make lead!... that's what this does, right?",
+        len = "Time to make lead!... t-that's what this does, right?",
     }
 end
 
