@@ -55,6 +55,7 @@ function item:init()
         noel = "Is this from a resturant?",
         ceroba = "Looks like a normal coin.",
         suzy = "Rest In Pepperonis",
+        len = "Looks like an arcade coin, which is neat!",
     }
 end
 

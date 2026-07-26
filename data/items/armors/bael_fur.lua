@@ -56,7 +56,24 @@ function item:init()
         calypso = "...It looks cool, at least.",
         hero = "Fuzzy",
         noel = "1 DEF won't help me.",
+        len = "Heavy... much?",
     }
+end
+
+function item:onEquip(character, replacement)
+    if character.id == "len" then
+        character:increaseStat("attack", -3)
+    end
+
+    return true
+end
+
+function item:onUnequip(character, replacement)
+    if character.id == "len" then
+        character:increaseStat("attack", 3)
+    end
+
+    return true
 end
 
 return item
