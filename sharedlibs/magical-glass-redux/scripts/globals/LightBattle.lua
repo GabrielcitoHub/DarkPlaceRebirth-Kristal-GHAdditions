@@ -153,6 +153,8 @@ function LightBattle:init()
     else
         self.no_buff_loop = false
     end
+
+    self.headwind = 0
 end
 
 function LightBattle:isPagerMenu()
@@ -1378,7 +1380,7 @@ function LightBattle:onDefendingState()
 				self.soul.can_move = false
 			end
 		end
-        self.soul:addChild(CerobaDiamondBuff(0, 0, function()
+        self:addChild(CerobaDiamondBuff(self.soul.x, self.soul.y, function()
 			for _, wave in ipairs(self.waves) do
 				wave.encounter = self.encounter
 
@@ -1843,6 +1845,8 @@ function LightBattle:nextTurn()
 
         self.soul:onMenuWaveStart()
     end
+
+    self.headwind = self.headwind - 1
 end
 
 function LightBattle:canSelectMenuItem(menu_item)

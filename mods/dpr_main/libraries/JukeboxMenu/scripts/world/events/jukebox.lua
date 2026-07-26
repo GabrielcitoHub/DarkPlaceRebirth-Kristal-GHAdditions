@@ -1,5 +1,5 @@
----@class Jukebox : Object
----@Jukebox fun(...) : Object
+---@class Event.jukebox : Event
+---@overload fun(data: table) : Event.jukebox
 local Jukebox, super = Class(Event)
 
 ---@param data table
@@ -7,20 +7,14 @@ function Jukebox:init(data)
     super.init(self, data.x, data.y, data.width, data.height)
     local properties = data and data.properties or {}
 
-    self:setOrigin(0.5, 1)
-    self:setScale(2)
-
-    self.sprite = Sprite("world/events/jukebox")
-    self:addChild(self.sprite)
-
-    self:setSize(self.sprite:getSize())
-    self:setHitbox(0, 33, 34, 11)
-
 	self.solid = true
+
+    self:setSprite("world/events/jukebox")
+    self:setOrigin(0.5, 1)
 
     self.simple = properties["simple"] or nil
 
-    self.menu = JukeboxMenu() ---@type JukeboxMenu
+    self.menu = JukeboxMenu(self.simple) ---@type JukeboxMenu
     self.timer = self:addChild(Timer())
 
     self.animate_to_beat = Kristal.getLibConfig("JukeboxMenu", "animateToBeat")
@@ -29,12 +23,25 @@ function Jukebox:init(data)
 end
 
 function Jukebox:openMenu()
-    self.menu = JukeboxMenu() ---@type JukeboxMenu
+    self.menu = JukeboxMenu(self.simple) ---@type JukeboxMenu
     Game.world:openMenu(self.menu)
 end
 
 function Jukebox:onInteract(chara, dir)
-    Game.world:startCutscene("jukebox.MAIN", self)
+    Game.world:startCutscene(function(cutscene)
+        cutscene:text("* A working jukebox.[wait:5]\n* Would you like to play a song?")
+
+        if cutscene:choicer({"Yes", "No"}) == 2 then
+            cutscene:text("* You decided to leave the jukebox in its undamaged state.")
+            return
+        end
+
+        Assets.stopAndPlaySound("ui_select")
+        cutscene:after(function()
+            self:openMenu()
+        end)
+    end)
+
     return true
 end
 
@@ -83,11 +90,12 @@ function Jukebox:update()
                 self.metronome_sound:play()
             end
 
-            self:setScale(2.2)
-            self.timer:tween(12/30, self, {scale_x=2, scale_y=2}, "out-sine")
+            self:setScale(1.1)
+            self.timer:tween(12/30, self, {scale_x=1, scale_y=1}, "out-sine")
 
-            local note = self:addChild(Sprite("world/events/musical_notes_small", 30 + MathUtils.random(10), 10))
+            local note = self:addChild(Sprite("world/events/jukebox/musical_note_small", 60 + love.math.random(10), 10))
             note:setLayer(10)
+            note:setScale(2)
             note.alpha = 0
 
             self.timer:script(function(wait)
@@ -98,8 +106,8 @@ function Jukebox:update()
                 note:remove()
             end)
             self.timer:tween(1, note, {
-                x = note.init_x + (20 + MathUtils.random(10)),
-                y = note.init_y - (30 + MathUtils.random(10))
+                x = note.init_x + (20 + love.math.random(10)),
+                y = note.init_y - (30 + love.math.random(10))
             }, "linear")
         end
 

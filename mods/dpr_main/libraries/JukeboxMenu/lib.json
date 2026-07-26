@@ -1,22 +1,25 @@
 {
     "id": "JukeboxMenu",
     "authors": [
-        "JaruEthaus",  // Original library creator & publisher.
-        "Dobby233Liu"  // Added a lot of extra configs to the library and helped polished it up.
+        "Just another random user.",
+        "Dobby233Liu"
     ],
     "version": "v2.0.0",
     "engineVer": "v0.10.0-dev",
     "config": {
-        "navigateToPlayingSongAtInit": true,       // Sets the default posititon of the soul to the song that's currently playing.
-        "indicatePlayingSongWithNameColor": true,  // Highlight the song that's currently playing
-        "indicatePlayingSongWithMusicNote": true,  // Have a music note graphic appear next to the currently playing song.
-        "infoCollapsible": true,                   // Allows the ability to show or hide the additional info next to the song selection.
-        "showDurationBar": true,                   // Shows the duration of the currently selected song by pressing "C". Also works with songs that have loop points if you have the `music2` library installed.
-        "animateToBeat": true,                     // Makes the Jukebox event bounce to the BPM of the currently selected song (note that BPM has to be defined for a song in `jukebox_songs`).
-        "albumArtDirectory": "albums/",            // Default directory for the album art cover graphics.
+        "navigateToPlayingSongAtInit": true,
+        "indicatePlayingSongWithNameColor": true,
+        "indicatePlayingSongWithMusicNote": true,
+        "infoCollapsible": true,
+        "showDurationBar": true,
+        "animateToBeat": true,
+        "albumArtDirectory": "albums/",
         "useSimpleModeByDefault": false,
-        "rememberCollpaseState": true,
-        "enableMetronome": false,                  // Enables a metronone sound for testing a song's BPM. (NOTE: highly experimental)
-        "defaultBpm": 120                          // Default BPM to use for all songs, unless BPM is defined for a song in `jukebox_songs`.
+        "rememberCollapseState": true,
+        "enableMetronome": false,
+        "defaultBpm": 120,
+        "showCollapseButtonHint": false,
+        "indicatePausedSongWithNameColor": true,
+        "confirmButtonTogglesSong": true
     }
 }
