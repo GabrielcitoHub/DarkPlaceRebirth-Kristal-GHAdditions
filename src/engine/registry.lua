@@ -664,7 +664,7 @@ function Registry.createRuntimeDrawFX(data, context)
     local success, fx, reason = pcall(definition.create_runtime, properties or {}, context or {})
     if not success then return nil, fx end
     if not fx then
-        return nil, reason or "DrawFX '" .. tostring(id) .. "' could not be created"
+        return nil, (reason or "DrawFX '") .. tostring(id) .. "' could not be created"
     end
     if properties.priority ~= nil then fx.priority = properties.priority end
     return fx, id

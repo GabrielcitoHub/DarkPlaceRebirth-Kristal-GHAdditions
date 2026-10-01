@@ -2126,13 +2126,13 @@ function Battle:checkSolidCollision(collider)
     if NOCLIP then return false end
     Object.startCache()
     if self.arena then
-        if self.arena:collidesWith(collider) then
+        if self.arena:meetsCollider(collider) then
             Object.endCache()
             return true, self.arena
         end
     end
     for _, solid in ipairs(Game.stage:getObjects(Solid)) do
-        if solid:collidesWith(collider) then
+        if solid:meetsCollider(collider) then
             Object.endCache()
             return true, solid
         end

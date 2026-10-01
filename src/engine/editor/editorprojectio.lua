@@ -592,7 +592,6 @@ function EditorProjectIO:hasUnsavedChanges()
 end
 
 ---@param options? {message?: string, save?: function, save_label?: string, dirty?: boolean}
-
 function EditorProjectIO:confirmUnsavedChanges(options)
     local self = self.editor
     options = options or {}

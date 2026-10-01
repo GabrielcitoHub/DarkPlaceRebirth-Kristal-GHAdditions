@@ -461,11 +461,6 @@ function Map:loadObject(name, data)
         return loaded
     end
 
-    -- Check for built-in events, must happen after everything else
-    if Game.builtin_event_registry:has(name) then
-        return Game.builtin_event_registry:create(name, data)
-    end
-
     -- Fallback to a TileObject
     if data.gid then
         return self:createTileObject(data)

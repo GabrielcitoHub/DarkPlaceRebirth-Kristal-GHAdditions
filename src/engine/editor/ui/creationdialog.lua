@@ -445,7 +445,7 @@ function EditorCreationDialog:submit()
     end
     local success, reason = self.on_create and self.on_create(values, definition, self.context)
     if success == false or success == nil then
-        self.error_message = reason or "Could not create " .. definition.name:lower()
+        self.error_message = (reason or "Could not create ") .. definition.name:lower()
         return false
     end
     self.editor:closeCreationDialog(true)

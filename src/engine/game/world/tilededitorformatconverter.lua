@@ -41,7 +41,7 @@ local function getTiledImageAssetId(image, map_data)
 end
 
 local function resolveTiledGid(gid, references)
-    local tile_gid, flip_x, flip_y, rotated = TiledUtils.parseTileGid(gid)
+    local tile_gid, flip_x, flip_y, rotated = MapUtils.unpackTileGid(gid)
     if tile_gid == 0 then return nil end
     local reference
     for _, candidate in ipairs(references) do

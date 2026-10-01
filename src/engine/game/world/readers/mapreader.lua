@@ -445,7 +445,7 @@ function operations.loadObject(self, name, data, context)
         return loaded
     end
 
-    Kristal.Console:warn("No object with ID '" .. tostring(name) .. "' found")
+    Logger:warn("No object with ID '" .. tostring(name) .. "' found")
 end
 
 function operations.loadController(self, name, data, context)
